@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Image, View, Text, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
+import { Image, View, Text, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { FB_APP_ID, HIGH_SCORE_KEY } from '../constant';
-// import * as AuthSession from 'expo-auth-session';
+import { HIGH_SCORE_KEY } from '../constant';
+import { LoginManager, AccessToken, Profile } from 'react-native-fbsdk-next';
 
 export default function HomeScreen({ navigation }: any) {
   const [highScore, setHighScore] = useState(0);
+  const [userInfo, setUserInfo] = useState<null | { name: string; picture: string }>(null);
 
-  // const [userInfo, setUserInfo] = React.useState<null | {
-  //   name: string;
-  //   picture: string;
-  // }>(null);
 
   useEffect(() => {
     AsyncStorage.getItem(HIGH_SCORE_KEY).then(val => {
@@ -18,60 +15,44 @@ export default function HomeScreen({ navigation }: any) {
     });
   }, []);
 
-  // const discovery = {
-  //   authorizationEndpoint: 'https://www.facebook.com/v17.0/dialog/oauth',
-  //   tokenEndpoint: 'https://graph.facebook.com/v17.0/oauth/access_token',
-  // };
+  const handleFBLogin = async () => {
+    try {
+      const result = await LoginManager.logInWithPermissions(['public_profile']);
+      if (result.isCancelled) return;
 
-  // const [request, response, promptAsync] = AuthSession.useAuthRequest(
-  //   {
-  //     clientId: FB_APP_ID,
-  //     redirectUri: AuthSession.makeRedirectUri({
-  //       native: 'aitinhmathon://redirect',
-  //     }),
-  //     scopes: ['public_profile'],
-  //     responseType: 'token',
-  //   },
-  //   discovery
-  // );
+      const data = await AccessToken.getCurrentAccessToken();
+      if (!data) return;
 
-  // React.useEffect(() => {
-  //   if (response?.type === 'success' && response.params.access_token) {
-  //     fetch(
-  //       `https://graph.facebook.com/me?fields=id,name,picture.type(large)&access_token=${response.params.access_token}`
-  //     )
-  //       .then((res) => res.json())
-  //       .then((data) => {
-  //         setUserInfo({
-  //           name: data.name,
-  //           picture: data.picture.data.url,
-  //         });
-  //       });
-  //   }
-  // }, [response]);
+      const profile = await Profile.getCurrentProfile();
+      if (profile) {
+        setUserInfo({
+          name: profile.name ?? '',
+          picture: profile.imageURL ?? '',
+        });
+      }
+    } catch (e) {
+      // Xử lý lỗi nếu cần
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.highScore}>🏆 Điểm cao nhất: {highScore}</Text>
       <Text style={styles.title}>🎨 Different Color Game</Text>
 
-      {
-      // userInfo ? (
-      //   <>
-      //     <Image
-      //       source={{ uri: userInfo.picture }}
-      //       style={{ width: 100, height: 100, borderRadius: 50 }}
-      //     />
-      //     <Text style={{ marginTop: 10, fontSize: 18 }}>{userInfo.name}</Text>
-      //   </>
-      // ) : (
-      //   <Button
-      //     title="Login with Facebook"
-      //     disabled={!request}
-      //     onPress={() => promptAsync()}
-      //   />
-      // )
-      }
+      {userInfo ? (
+        <>
+          <Image
+            source={{ uri: userInfo.picture }}
+            style={{ width: 100, height: 100, borderRadius: 50 }}
+          />
+          <Text style={{ marginTop: 10, fontSize: 18 }}>{userInfo.name}</Text>
+        </>
+      ) : (
+        <TouchableOpacity style={styles.fbButton} onPress={handleFBLogin}>
+          <Text style={styles.fbButtonText}>Login with Facebook</Text>
+        </TouchableOpacity>
+      )}
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Game')}>
         <Text style={styles.buttonText}>Chơi ngay</Text>
       </TouchableOpacity>
