@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,7 +11,9 @@ import {
 } from '../utils';
 import { ColorGrid } from '../components/ColorGrid';
 import { HIGH_SCORE_KEY, MAX_DIFFERENCE, START_GRID_SIZE } from '../constant';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+const Icon = FontAwesome6 as unknown as React.FC<any>;
+import { updateHighScore } from '../firebase/firebaseUtils';
 
 const TOTAL_TIME = 120; // 2 phút
 
@@ -40,14 +43,6 @@ export default function MainGamePlay({ navigation }: any) {
             if (val) setHighScore(Number(val));
         });
     }, []);
-
-    // Khi game over, nếu score cao hơn highScore thì lưu lại
-    useEffect(() => {
-        if (gameOver && score > highScore) {
-            setHighScore(score);
-            AsyncStorage.setItem(HIGH_SCORE_KEY, score.toString());
-        }
-    }, [gameOver, score, highScore]);
 
     const startNewRound = () => {
         const newGridSize = getGridSizeByLevel(level, START_GRID_SIZE);
@@ -81,10 +76,16 @@ export default function MainGamePlay({ navigation }: any) {
         return () => clearInterval(interval);
     }, [gameOver]);
 
-    // Đếm ngược 3 phút
+    // Đếm ngược 2 phút
     useEffect(() => {
         if (gameOver) return;
         if (remainingTime <= 0) {
+            if (score >= highScore) {
+                AsyncStorage.setItem(HIGH_SCORE_KEY, score.toString());
+                updateHighScore(score);
+                setHighScore(score);
+            }
+
             setGameOver(true);
             return;
         }
@@ -92,7 +93,7 @@ export default function MainGamePlay({ navigation }: any) {
             setRemainingTime((prev) => prev - 1);
         }, 1000);
         return () => clearInterval(countdown);
-    }, [remainingTime, gameOver]);
+    }, [remainingTime, gameOver, highScore, score]);
 
     // Reset game
     const handleRestart = () => {
@@ -107,7 +108,11 @@ export default function MainGamePlay({ navigation }: any) {
         let earnedScore = 0;
         if (index === targetIndex) {
             earnedScore = Math.max(100 - timer * 10, 10);
-            setScore((prev) => prev + earnedScore);
+
+            const newScore = score + earnedScore;
+            setScore(newScore);
+
+            setLevel((prev) => prev + 1);
 
             animatedScore.setValue(1.3);
             Animated.spring(animatedScore, {
@@ -115,8 +120,6 @@ export default function MainGamePlay({ navigation }: any) {
                 friction: 4,
                 useNativeDriver: true,
             }).start();
-
-            setLevel((prev) => prev + 1);
         } else {
             earnedScore = -20;
             setScore((prev) => Math.max(prev - 20, 0));
@@ -150,7 +153,7 @@ export default function MainGamePlay({ navigation }: any) {
         <View style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Ionicons name="arrow-back" size={28} color="#3b82f6" />
+                    <Icon name="arrow-left" size={32} color="#3b82f6" />
                 </TouchableOpacity>
                 <Text style={styles.level}>Level {level}</Text>
                 <Animated.Text

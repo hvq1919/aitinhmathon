@@ -55,7 +55,7 @@ export const getRandomString = () => {
   return result;
 }
 
-export const getPlayerId = (roomId: string): string => {
+export const getDeviceId = (roomId: string): string => {
   if (__DEV__) {
     return `DEV_${roomId}`;
   }
