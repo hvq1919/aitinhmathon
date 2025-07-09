@@ -14,6 +14,7 @@ import { HIGH_SCORE_KEY, MAX_DIFFERENCE, START_GRID_SIZE } from '../constant';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 const Icon = FontAwesome6 as unknown as React.FC<any>;
 import { updateHighScore } from '../firebase/firebaseUtils';
+import GameOver from '../components/GameOver';
 
 const TOTAL_TIME = 120; // 2 phút
 
@@ -135,18 +136,7 @@ export default function MainGamePlay({ navigation }: any) {
 
     // Hiển thị màn hình End game
     if (gameOver) {
-        return (
-            <View style={styles.container}>
-                <View style={styles.endGameBox}>
-                    <Text style={styles.endGameTitle}>⏰ Hết giờ!</Text>
-                    <Text style={styles.endGameScore}>Điểm của bạn: {score}</Text>
-                    <Text style={styles.highScore}>🏆 Điểm cao nhất: {highScore}</Text>
-                    <TouchableOpacity style={styles.restartBtn} onPress={handleRestart}>
-                        <Text style={styles.restartText}>Chơi lại</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        );
+        return <GameOver score={score} highScore={highScore} handleRestart={handleRestart} />
     }
 
     return (

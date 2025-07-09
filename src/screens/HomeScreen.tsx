@@ -1,12 +1,15 @@
+/* eslint-disable react-native/no-inline-styles */
 /* eslint-disable curly */
 import React, { useEffect, useCallback, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { HIGH_SCORE_KEY } from '../constant';
 import { useFocusEffect } from '@react-navigation/native';
 import FacebookLogin from '../components/FacebookLogin';
 import { appStyles } from '../styles';
 import { ScrollView } from 'react-native-gesture-handler';
+import { PressableButton } from '../components/PressableButton';
+import { getRandomMaterialColor } from '../utils';
 
 export default function HomeScreen({ navigation }: any) {
   const [highScore, setHighScore] = useState(0);
@@ -29,6 +32,7 @@ export default function HomeScreen({ navigation }: any) {
     }, [])
   );
 
+  const color = getRandomMaterialColor();
   return (
     <View style={appStyles.container}>
       <View style={appStyles.headerTop}>
@@ -38,13 +42,22 @@ export default function HomeScreen({ navigation }: any) {
 
       <ScrollView>
         <View>
-          <Text style={styles.title}>🎨 Ai Tinh Mắt Hơn </Text>
+          <View style={{
+            flexDirection: 'row', alignItems: 'center',
+            marginBottom: 32,
+            marginTop: 20,
+          }}>
 
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Game')}>
-            <Text style={styles.buttonText}>Chơi ngay</Text>
-          </TouchableOpacity>
+            <Image
+              style={{ width: 40, height: 40 }}
+              source={require('../assets/eye.png')}
+            />
+            <Text style={[styles.title, { color: color }]}> Ai Tinh Mắt Hơn </Text>
+          </View>
+
+          <PressableButton title="Chơi ngay" onPress={() => navigation.navigate('Game')} style={[styles.button, { backgroundColor: color }]} />
           <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('HighScore')}>
-            <Text style={styles.buttonText}>Điểm cao</Text>
+            <Text style={styles.buttonText}>Bảng xếp hạng</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Help')}>
             <Text style={styles.buttonText}>Hướng dẫn</Text>
@@ -100,32 +113,43 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 32,
-    marginTop: 20,
     color: '#3b82f6',
     textAlign: 'center',
   },
   button: {
     backgroundColor: '#3b82f6',
     paddingVertical: 14,
-    paddingHorizontal: 40,
-    borderRadius: 12,
-    marginTop: 18,
-    minWidth: 180,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    marginTop: 16,
+    minWidth: 220,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+    alignSelf: 'center',
   },
   buttonOnline: {
     backgroundColor: '#16a34a',
     paddingVertical: 14,
-    paddingHorizontal: 40,
-    borderRadius: 12,
-    marginTop: 18,
-    minWidth: 180,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    marginTop: 16,
+    minWidth: 220,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+    alignSelf: 'center',
   },
   buttonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
+    letterSpacing: 0.5,
   },
   fbButton: {
     backgroundColor: '#1877f3',

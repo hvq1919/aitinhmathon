@@ -14,7 +14,7 @@ import { getDeviceId } from '../utils';
 import { updateFacebookUser } from '../firebase/firebaseUtils';
 
 interface IProps {
-    highScore: number;
+    highScore?: number;
 }
 
 const FacebookLogin = (props: IProps) => {
@@ -52,7 +52,28 @@ const FacebookLogin = (props: IProps) => {
         }
     };
 
-    return (
+    const viewBxh = () => {
+        return (
+            <View >
+                {userInfo ? (<View style={styles.profileBox}>
+                    <Image
+                        source={{ uri: userInfo.url }}
+                        style={styles.avatar}
+                    />
+                </View>
+                ) : (
+                    <TouchableOpacity onPress={handleFBLogin} style={styles.loginBtn}>
+                        <Image
+                            style={styles.fbImage}
+                            source={require('../assets/fb_login.png')}
+                        />
+                    </TouchableOpacity>
+                )}
+            </View>
+        );
+    }
+
+    return props.highScore ? (
         <View style={styles.container}>
             {userInfo ? (<View style={styles.profileBox}>
                 <Image
@@ -61,7 +82,7 @@ const FacebookLogin = (props: IProps) => {
                 />
                 <View style={{ marginLeft: 5, justifyContent: 'center' }}>
                     <Text style={styles.name}>{userInfo.name}</Text>
-                    <Text style={styles.score}>🏆 {props.highScore ?? 0}</Text>
+                    {props.highScore && <Text style={styles.score}>🏆 {props.highScore ?? 0}</Text>}
                 </View>
             </View>
             ) : (
@@ -73,7 +94,7 @@ const FacebookLogin = (props: IProps) => {
                 </TouchableOpacity>
             )}
         </View>
-    );
+    ) : viewBxh();
 };
 
 const styles = StyleSheet.create({

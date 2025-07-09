@@ -35,7 +35,7 @@ export default function App() {
         <Stack.Screen
           name="HighScore"
           component={HighScoreScreen}
-          options={{ title: 'Điểm cao' }}
+          options={{ title: 'Điểm cao', headerShown: false }}
         />
         <Stack.Screen
           name="Help"

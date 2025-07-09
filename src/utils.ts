@@ -1,4 +1,4 @@
-import { CODE_LENGHT } from './constant';
+import { CODE_LENGHT, MATERIAL_COLORS } from './constant';
 
 // Tạo màu ngẫu nhiên với giới hạn độ sáng
 export const getRandomBaseColor = (): { r: number; g: number; b: number } => {
@@ -61,4 +61,9 @@ export const getDeviceId = (roomId: string): string => {
   }
   const DeviceInfo = require('react-native-device-info').default;
   return DeviceInfo.getUniqueIdSync();
+}
+
+export function getRandomMaterialColor(): string {
+  const index = Math.floor(Math.random() * MATERIAL_COLORS.length);
+  return MATERIAL_COLORS[index];
 }

@@ -1,9 +1,9 @@
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
 import { firestore } from './firebaseConfig';
 import { getDeviceId } from '../utils';
 
 export const updateHighScore = async (highScore: number) => {
-    const deviceId = await getDeviceId('');
+    const deviceId = await getDeviceId(`${Math.round(1000 * Math.random())}`);
     const userRef = doc(firestore, 'users', deviceId);
     const existingDoc = await getDoc(userRef);
     if (existingDoc.exists()) {
@@ -48,3 +48,15 @@ export const updateFacebookUser = async (userData: {
     }
 };
 
+
+export const deleteAllUsers = async () => {
+    const usersRef = collection(firestore, 'users');
+    const snapshot = await getDocs(usersRef);
+
+    const deletePromises = snapshot.docs.map((docSnap) => {
+        return deleteDoc(doc(firestore, 'users', docSnap.id));
+    });
+
+    await Promise.all(deletePromises);
+    console.log('✅ Đã xóa toàn bộ user trong Firestore.');
+}
