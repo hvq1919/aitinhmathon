@@ -9,7 +9,7 @@ import FacebookLogin from '../components/FacebookLogin';
 const Icon = FontAwesome6 as unknown as React.FC<any>;
 import { isEmpty } from 'lodash';
 import AvatarIcon from '../components/AvatarIcon';
-import { getDeviceId } from 'react-native-device-info';
+import { getDeviceId } from '../utils';
 
 interface User {
     id: string;
@@ -24,7 +24,7 @@ export default function HighScoreScreen({ navigation }: any) {
     const [loading, setLoading] = useState(true);
     const [notInLimit, setNotInLimit] = useState(false);
 
-    const deviceId = getDeviceId();
+    const deviceId = getDeviceId('');
     useEffect(() => {
         const fetchHighScores = async () => {
             try {

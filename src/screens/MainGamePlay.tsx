@@ -15,8 +15,10 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 const Icon = FontAwesome6 as unknown as React.FC<any>;
 import { updateHighScore } from '../firebase/firebaseUtils';
 import GameOver from '../components/GameOver';
+import { loadSounds, playCorrect, playWrong, playWin, releaseSounds } from '../soundManager';
 
-const TOTAL_TIME = 120; // 2 phút
+
+const TOTAL_TIME = 20; // 2 phút
 
 export default function MainGamePlay({ navigation }: any) {
     const [level, setLevel] = useState(1);
@@ -43,6 +45,10 @@ export default function MainGamePlay({ navigation }: any) {
         AsyncStorage.getItem(HIGH_SCORE_KEY).then(val => {
             if (val) setHighScore(Number(val));
         });
+        loadSounds();
+        return () => {
+            releaseSounds(); // cleanup
+        };
     }, []);
 
     const startNewRound = () => {
@@ -87,6 +93,7 @@ export default function MainGamePlay({ navigation }: any) {
                 setHighScore(score);
             }
 
+            playWin();
             setGameOver(true);
             return;
         }
@@ -108,8 +115,9 @@ export default function MainGamePlay({ navigation }: any) {
         if (gameOver) return;
         let earnedScore = 0;
         if (index === targetIndex) {
-            earnedScore = Math.max(100 - timer * 10, 10);
+            playCorrect();
 
+            earnedScore = Math.max(100 - timer * 10, 10);
             const newScore = score + earnedScore;
             setScore(newScore);
 
@@ -122,6 +130,7 @@ export default function MainGamePlay({ navigation }: any) {
                 useNativeDriver: true,
             }).start();
         } else {
+            playWrong();
             earnedScore = -20;
             setScore((prev) => Math.max(prev - 20, 0));
 
