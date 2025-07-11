@@ -7,9 +7,8 @@ import MainGamePlay from './src/screens/MainGamePlay';
 import HomeScreen from './src/screens/HomeScreen';
 import HighScoreScreen from './src/screens/HighScoreScreen';
 import HelpScreen from './src/screens/HelpScreen';
-import CreateRoomScreen from './src/screens/CreateRoomScreen';
-import JoinRoomScreen from './src/screens/JoinRoomScreen';
-import GameRoom from './src/screens/GameRoom';
+import GameRoomScreen from './src/screens/rooms/GameRoomScreen';
+import JoinRoomScreen from './src/screens/rooms/JoinRoomScreen';
 
 const Stack = createStackNavigator();
 
@@ -25,7 +24,7 @@ export default function App() {
         <Stack.Screen
           name="Home"
           component={HomeScreen}
-          options={{ title: 'Different Color Game', headerShown: false }}
+          options={{ title: 'Ai Tinh Mắt Hơn', headerShown: false }}
         />
         <Stack.Screen
           name="Game"
@@ -42,9 +41,14 @@ export default function App() {
           component={HelpScreen}
           options={{ title: 'Hướng dẫn' }}
         />
-        <Stack.Screen name="CreateRoom" component={CreateRoomScreen} />
-        <Stack.Screen name="JoinRoom" component={JoinRoomScreen} />
-        <Stack.Screen name="GameRoom" component={GameRoom} />
+        <Stack.Screen
+          name="GameRoom"
+          component={GameRoomScreen}
+          options={{ title: 'Game Room', headerShown: false }} />
+        <Stack.Screen
+          name="JoinRoom"
+          component={JoinRoomScreen}
+          options={{ title: 'Tạo / Vào phòng đấu online', headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

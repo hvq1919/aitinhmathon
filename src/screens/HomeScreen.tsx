@@ -9,7 +9,9 @@ import FacebookLogin from '../components/FacebookLogin';
 import { appStyles } from '../styles';
 import { ScrollView } from 'react-native-gesture-handler';
 import { PressableButton } from '../components/PressableButton';
-import { getRandomMaterialColor } from '../utils';
+import { MainColor } from '../utils';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+const Icon = FontAwesome6 as unknown as React.FC<any>;
 
 export default function HomeScreen({ navigation }: any) {
   const [highScore, setHighScore] = useState(0);
@@ -32,7 +34,6 @@ export default function HomeScreen({ navigation }: any) {
     }, [])
   );
 
-  const color = getRandomMaterialColor();
   return (
     <View style={appStyles.container}>
       <View style={appStyles.headerTop}>
@@ -52,22 +53,40 @@ export default function HomeScreen({ navigation }: any) {
               style={{ width: 40, height: 40 }}
               source={require('../assets/eye.png')}
             />
-            <Text style={[styles.title, { color: color }]}> Ai Tinh Mắt Hơn </Text>
+            <Text style={[styles.title, { color: MainColor }]}> Ai Tinh Mắt Hơn </Text>
           </View>
 
-          <PressableButton title="Chơi ngay" onPress={() => navigation.navigate('Game')} style={[styles.button, { backgroundColor: color }]} />
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('HighScore')}>
-            <Text style={styles.buttonText}>Bảng xếp hạng</Text>
+          <PressableButton
+            title={
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name="play" size={20} color="#fff" style={{ marginRight: 8 }} />
+                <Text style={styles.buttonText}>Chơi ngay</Text>
+              </View>
+            }
+            onPress={() => navigation.navigate('Game')}
+            style={[styles.button, { backgroundColor: MainColor }]}
+          />
+          <TouchableOpacity style={[styles.button, { marginTop: 50 }]} onPress={() => navigation.navigate('HighScore')}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="trophy" size={20} color={'white'} style={{ marginRight: 8 }} />
+              <Text style={styles.buttonText}>Bảng xếp hạng</Text>
+            </View>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Help')}>
-            <Text style={styles.buttonText}>Hướng dẫn</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="circle-question" size={20} color={'white'} style={{ marginRight: 8 }} />
+              <Text style={styles.buttonText}>Hướng dẫn</Text>
+            </View>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonOnline} onPress={() => navigation.navigate('CreateRoom')}>
-            <Text style={styles.buttonText}>Tạo phòng đấu online</Text>
+          <TouchableOpacity style={[styles.buttonOnline, { marginTop: 50 }]} onPress={() => navigation.navigate('JoinRoom')}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="users" size={20} color="#fff" style={{ marginRight: 8 }} />
+              <Text style={styles.buttonText}>Solo với lũ bạn</Text>
+            </View>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonOnline} onPress={() => navigation.navigate('JoinRoom')}>
+          {/* <TouchableOpacity style={styles.buttonOnline} onPress={() => navigation.navigate('JoinRoom')}>
             <Text style={styles.buttonText}>Vào phòng đấu online</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </ScrollView>
 

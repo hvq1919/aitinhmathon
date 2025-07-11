@@ -40,24 +40,19 @@ export const getRandomTargetIndex = (gridSize: number): number => {
   return Math.floor(Math.random() * gridSize * gridSize);
 };
 
-const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-export const getRandomString = () => {
-  let result = '';
-  let used = new Set();
-  while (result.length < CODE_LENGHT) {
-    const idx = Math.floor(Math.random() * chars.length);
-    const char = chars[idx];
-    if (!used.has(char)) {
-      result += char;
-      used.add(char);
-    }
-  }
-  return result;
-}
 
-export const getDeviceId = (roomId: string): string => {
+// Tạo mã phòng ngẫu nhiên (5 chữ cái/số)
+export const getRandomString = (): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  return Array.from({ length: CODE_LENGHT }, () =>
+    chars.charAt(Math.floor(Math.random() * chars.length))
+  ).join('');
+};
+
+export const getDeviceId = (roomId?: string): string => {
   if (__DEV__) {
-    return `DEV_${roomId}`;
+    const id = roomId ?? FixRandomString;
+    return `DEV_${id}`;
   }
   const DeviceInfo = require('react-native-device-info').default;
   return DeviceInfo.getUniqueIdSync();
@@ -67,3 +62,6 @@ export function getRandomMaterialColor(): string {
   const index = Math.floor(Math.random() * MATERIAL_COLORS.length);
   return MATERIAL_COLORS[index];
 }
+
+export const MainColor = getRandomMaterialColor();
+export const FixRandomString = getRandomString();

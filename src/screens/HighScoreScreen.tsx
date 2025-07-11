@@ -9,7 +9,7 @@ import FacebookLogin from '../components/FacebookLogin';
 const Icon = FontAwesome6 as unknown as React.FC<any>;
 import { isEmpty } from 'lodash';
 import AvatarIcon from '../components/AvatarIcon';
-import { getDeviceId } from '../utils';
+import { getDeviceId, MainColor } from '../utils';
 
 interface User {
     id: string;
@@ -83,7 +83,7 @@ export default function HighScoreScreen({ navigation }: any) {
     if (loading) {
         return (
             <View style={styles.center}>
-                <ActivityIndicator size="large" color="#3b82f6" />
+                <ActivityIndicator size="large" color={MainColor} />
             </View>
         );
     }
@@ -92,7 +92,7 @@ export default function HighScoreScreen({ navigation }: any) {
         <View style={styles.container}>
             <View style={[styles.header, { marginBottom: 10 }]}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Icon name="arrow-left" size={32} color="#3b82f6" />
+                    <Icon name="arrow-left" size={32} color={MainColor} />
                 </TouchableOpacity>
                 <Text style={styles.level}>Bảng Xếp Hạng</Text>
                 <FacebookLogin />
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     level: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#3b82f6',
+        color: MainColor,
     },
     center: {
         flex: 1,
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
         fontSize: 26,
         fontWeight: 'bold',
         marginBottom: 20,
-        color: '#3b82f6',
+        color: MainColor,
         alignSelf: 'center',
     },
     item: {

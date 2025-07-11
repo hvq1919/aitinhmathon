@@ -8,6 +8,7 @@ import {
     getTargetColor,
     getGridSizeByLevel,
     getRandomTargetIndex,
+    MainColor,
 } from '../utils';
 import { ColorGrid } from '../components/ColorGrid';
 import { HIGH_SCORE_KEY, MAX_DIFFERENCE, START_GRID_SIZE } from '../constant';
@@ -152,7 +153,7 @@ export default function MainGamePlay({ navigation }: any) {
         <View style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Icon name="arrow-left" size={32} color="#3b82f6" />
+                    <Icon name="arrow-left" size={32} color={MainColor} />
                 </TouchableOpacity>
                 <Text style={styles.level}>Level {level}</Text>
                 <Animated.Text
@@ -205,7 +206,7 @@ const styles = StyleSheet.create({
     level: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#3b82f6',
+        color: MainColor,
     },
     score: {
         fontSize: 18,
