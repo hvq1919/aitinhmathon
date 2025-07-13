@@ -1,13 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable curly */
 import React, { useEffect, useCallback, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Image, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { HIGH_SCORE_KEY } from '../constant';
 import { useFocusEffect } from '@react-navigation/native';
 import FacebookLogin from '../components/FacebookLogin';
 import { appStyles } from '../styles';
-import { ScrollView } from 'react-native-gesture-handler';
 import { PressableButton } from '../components/PressableButton';
 import { MainColor } from '../utils';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';

@@ -9,10 +9,13 @@ type Props = {
     targetColor: string;
     targetIndex: number;
     onPress: (index: number) => void;
+    note?: string;
 };
 
 const GRID_MARGIN_HORIZONTAL = 8;
 const GRID_PADDING = 8;
+
+const defaultNote = `Cứ mỗi giây thì màu khác biệt sẽ hiện rõ hơn.\nClick càng nhanh thì điểm càng cao.`
 
 export const ColorGrid: React.FC<Props> = ({
     gridSize,
@@ -20,6 +23,7 @@ export const ColorGrid: React.FC<Props> = ({
     targetColor,
     targetIndex,
     onPress,
+    note,
 }) => {
     const cellPadding = 2;
     const totalPadding = cellPadding * (gridSize * 2);
@@ -49,7 +53,7 @@ export const ColorGrid: React.FC<Props> = ({
                 })}
             </View>
             <Text style={styles.note}>
-                {`Cứ mỗi giây thì màu khác biệt sẽ hiện rõ hơn.\nClick càng nhanh thì điểm càng cao.`}
+                {note ?? defaultNote}
             </Text>
         </View>
     );

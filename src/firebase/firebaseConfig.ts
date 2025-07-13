@@ -14,17 +14,6 @@ const firebaseConfig = {
   databaseURL: 'https://ai-tinh-mat-hon-default-rtdb.asia-southeast1.firebasedatabase.app',
 };
 
-const app = initializeApp(firebaseConfig, 'realtime-database');
+const app = initializeApp(firebaseConfig);
 export const db = getDatabase(app);
-
-const fireStorageConfig = {
-  apiKey: 'AIzaSyBTl2bRuwMlBDtiGRgdG271Gt4WlqvRFl0',
-  authDomain: 'ai-tinh-mat-hon-storage.firebaseapp.com',
-  projectId: 'ai-tinh-mat-hon-storage',
-  storageBucket: 'ai-tinh-mat-hon-storage.firebasestorage.app',
-  messagingSenderId: '754039399094',
-  appId: '1:754039399094:web:88c1268abf1c870873bc17',
-  measurementId: 'G-FBE3NZC021',
-};
-const fireStorageApp = initializeApp(fireStorageConfig, 'firestore-database');
-export const firestore = getFirestore(fireStorageApp);
+export const firestore = getFirestore(app);

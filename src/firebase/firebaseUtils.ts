@@ -3,7 +3,7 @@ import { firestore } from './firebaseConfig';
 import { getDeviceId } from '../utils';
 
 export const updateHighScore = async (highScore: number) => {
-    const deviceId = await getDeviceId(`${Math.round(1000 * Math.random())}`);
+    const deviceId = await getDeviceId();
     const userRef = doc(firestore, 'users', deviceId);
     const existingDoc = await getDoc(userRef);
     if (existingDoc.exists()) {
@@ -29,7 +29,7 @@ export const updateFacebookUser = async (userData: {
     url: string;
     fb_id: string;
 }) => {
-    const deviceId = await getDeviceId('');
+    const deviceId = await getDeviceId();
     const userRef = doc(firestore, 'users', deviceId);
     const existingDoc = await getDoc(userRef);
     if (existingDoc.exists()) {

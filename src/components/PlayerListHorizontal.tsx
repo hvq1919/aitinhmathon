@@ -21,10 +21,10 @@ interface Props {
 
 const PlayerListHorizontal: React.FC<Props> = ({ players, hostKey, showScore = false }) => {
   // Chủ phòng đứng đầu
-  const sortedPlayers = [
-    ...players.filter((p) => p.key === hostKey),
+  const sortedPlayers = showScore ? [...players].sort((a: any, b: any) => b.highScore - a.highScore)
+    : [...players.filter((p) => p.key === hostKey),
     ...players.filter((p) => p.key !== hostKey),
-  ];
+    ];
 
   return (
     <FlatList
@@ -41,14 +41,14 @@ const PlayerListHorizontal: React.FC<Props> = ({ players, hostKey, showScore = f
               {item.url ? (
                 <Image source={{ uri: item.url }} style={styles.avatarImg} />
               ) : (
-                <AvatarIcon size={56}/>
+                <AvatarIcon size={56} />
               )}
             </View>
             {isHost && (
-                <View style={styles.crownWrap}>
-                  <Icon name="key" size={12} color="#FFD700" />
-                </View>
-              )}
+              <View style={styles.crownWrap}>
+                <Icon name="key" size={12} color="#FFD700" />
+              </View>
+            )}
             <Text style={styles.playerName} numberOfLines={1}>
               {item.name}
             </Text>

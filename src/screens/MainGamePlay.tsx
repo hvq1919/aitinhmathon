@@ -66,23 +66,15 @@ export default function MainGamePlay({ navigation }: any) {
     }, [level]);
 
     useEffect(() => {
+        if (gameOver) return;
         const interval = setInterval(() => {
             const diff = level > 10 ? 2 : 3;
             setDifference((prev) => Math.min(prev + diff, MAX_DIFFERENCE));
             setTimer((prev) => prev + 1);
         }, 1000);
         return () => clearInterval(interval);
-    }, []);
-
-
-    useEffect(() => {
-        if (gameOver) return;
-        const interval = setInterval(() => {
-            setDifference((prev) => Math.min(prev + 3, MAX_DIFFERENCE));
-            setTimer((prev) => prev + 1);
-        }, 1000);
-        return () => clearInterval(interval);
     }, [gameOver]);
+
 
     // Đếm ngược 2 phút
     useEffect(() => {

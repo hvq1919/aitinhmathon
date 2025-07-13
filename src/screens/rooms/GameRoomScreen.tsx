@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Clipboard } from 'react-native';
 import PlayerListHorizontal from '../../components/PlayerListHorizontal';
+import PlayingView from './PlayingView';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { ref, onValue } from 'firebase/database';
 import { leaveRoom, startGame } from './roomFunctions';
@@ -17,10 +18,11 @@ const GameRoomScreen = () => {
   const navigation = useNavigation<any>();
   const { roomCode, playerKey, playerName, isHost } = route.params;
 
-  const [players, setPlayers] = useState<{ key: string; name: string }[]>([]);
+  const [players, setPlayers] = useState<{ key: string; name: string; highScore?: number; score?: number }[]>([]);
   const [status, setStatus] = useState('waiting');
   const [hostKey, setHostKey] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [gameState, setGameState] = useState<any | null>(null);
 
   /** Xóa phòng khi rời màn hình */
   useEffect(() => {
@@ -47,6 +49,7 @@ const GameRoomScreen = () => {
         const playerList = Object.keys(data.players).map((key) => ({
           key,
           name: data.players[key].name,
+          highScore: data.players[key].highScore,
           score: data.players[key].score,
           url: data.players[key].url,
         }));
@@ -55,10 +58,8 @@ const GameRoomScreen = () => {
         setPlayers([]);
       }
       setLoading(false);
-      // Nếu đã start thì chuyển sang màn ColorGrid
-      if (data.status === 'playing') {
-        Alert.alert('Game đã bắt đầu!'); // TODO
-        // navigation.replace('ColorGrid', { roomCode, playerKey, playerName });
+      if (data && data.gameState) {
+        setGameState(data.gameState);
       }
     });
     return () => unsubscribe();
@@ -77,36 +78,58 @@ const GameRoomScreen = () => {
     Alert.alert('Đã sao chép mã phòng!');
   };
 
+  const waitingView = () => {
+    return (
+      <>
+        <Header title="Phòng chờ" navigation={navigation} />
+        <View style={styles.card}>
+          <Text style={styles.roomCodeLabel}>MÃ PHÒNG</Text>
+          <TouchableOpacity style={styles.roomCodeBox} onPress={handleCopyRoomCode} activeOpacity={0.7}>
+            <Text style={styles.roomCode}>{roomCode}</Text>
+            <Icon name="copy" size={18} color={MainColor} style={{ marginLeft: 8 }} />
+          </TouchableOpacity>
+          <Text style={styles.infoText}>Chia sẻ mã phòng cho bạn bè để cùng tham gia!</Text>
+          <Text style={styles.listTitle}>Danh sách người chơi:</Text>
+          {loading ? (
+            <ActivityIndicator color={MainColor} size="large" style={{ marginVertical: 24 }} />
+          ) : (
+            <PlayerListHorizontal
+              players={players}
+              hostKey={hostKey}
+              showScore={status === 'playing'}
+            />
+          )}
+          {isHost && status === 'waiting' && (
+            <TouchableOpacity style={[styles.startBtn, { backgroundColor: MainColor }]} onPress={handleStartGame} activeOpacity={0.8}>
+              <Icon name="play" size={20} color="#fff" style={{ marginRight: 8 }} />
+              <Text style={styles.startBtnText}>Bắt đầu</Text>
+            </TouchableOpacity>
+          )}
+          {!isHost && (
+            <DotAnimation message="Đợi chủ phòng bắt đầu game" />
+          )}
+        </View>
+      </>
+    );
+  };
+
+  const playingView = () => {
+
+    if (!gameState) return <Text>Đang tải game...</Text>;
+
+    return (
+      <PlayingView
+        gameState={gameState}
+        players={players}
+        hostKey={hostKey}
+        playerKey={playerKey}
+      />
+    );
+  };
+
   return (
     <View style={styles.bg}>
-      <Header title="Phòng chờ" navigation={navigation} />
-      <View style={styles.card}>
-        <Text style={styles.roomCodeLabel}>MÃ PHÒNG</Text>
-        <TouchableOpacity style={styles.roomCodeBox} onPress={handleCopyRoomCode} activeOpacity={0.7}>
-          <Text style={styles.roomCode}>{roomCode}</Text>
-          <Icon name="copy" size={18} color={MainColor} style={{ marginLeft: 8 }} />
-        </TouchableOpacity>
-        <Text style={styles.infoText}>Chia sẻ mã phòng cho bạn bè để cùng tham gia!</Text>
-        <Text style={styles.listTitle}>Danh sách người chơi:</Text>
-        {loading ? (
-          <ActivityIndicator color={MainColor} size="large" style={{ marginVertical: 24 }} />
-        ) : (
-          <PlayerListHorizontal
-            players={players}
-            hostKey={hostKey}
-            showScore={status === 'playing'} 
-          />
-        )}
-        {isHost && status === 'waiting' && (
-          <TouchableOpacity style={[styles.startBtn, { backgroundColor: MainColor }]} onPress={handleStartGame} activeOpacity={0.8}>
-            <Icon name="play" size={20} color="#fff" style={{ marginRight: 8 }} />
-            <Text style={styles.startBtnText}>Bắt đầu</Text>
-          </TouchableOpacity>
-        )}
-        {!isHost && (
-          <DotAnimation message="Đợi chủ phòng bắt đầu game" />
-        )}
-      </View>
+      {status === 'playing' ? playingView() : waitingView()}
     </View>
   );
 };

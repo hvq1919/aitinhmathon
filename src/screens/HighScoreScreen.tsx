@@ -24,7 +24,7 @@ export default function HighScoreScreen({ navigation }: any) {
     const [loading, setLoading] = useState(true);
     const [notInLimit, setNotInLimit] = useState(false);
 
-    const deviceId = getDeviceId('');
+    const deviceId = getDeviceId();
     useEffect(() => {
         const fetchHighScores = async () => {
             try {

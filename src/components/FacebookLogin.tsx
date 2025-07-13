@@ -39,7 +39,7 @@ const FacebookLogin = (props: IProps) => {
             const profile = await Profile.getCurrentProfile();
             if (profile) {
                 const info = {
-                    fb_id: profile.userID ?? getDeviceId(''),
+                    fb_id: profile.userID ?? getDeviceId(),
                     name: profile.name ?? '',
                     url: profile.imageURL ?? '',
                 };

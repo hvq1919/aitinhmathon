@@ -6,7 +6,7 @@ import {
   get,
   onDisconnect,
 } from 'firebase/database';
-import { getDeviceId, getRandomString } from '../../utils';
+import { getDeviceId, getRandomBaseColor, getRandomString, getRandomTargetIndex, getTargetColor, MainColor } from '../../utils';
 
 // Tạo phòng mới và thêm chủ phòng
 export const createRoom = async (playerName: string, url?: string) => {
@@ -63,11 +63,15 @@ export const joinRoom = async (
 // Bắt đầu game (chỉ chủ phòng gọi)
 export const startGame = async (roomCode: string) => {
   const roomRef = ref(db, `rooms/${roomCode}`);
+  const baseColor = getRandomBaseColor();
   await update(roomRef, {
     status: 'playing',
     gameState: {
-      round: 1,
-      timestamp: Date.now(),
+      level: 1,
+      baseColor: baseColor,
+      gridSize: 5,
+      targetColor: getTargetColor(baseColor, 1),
+      targetIndex: getRandomTargetIndex(5),
     },
   });
 };
