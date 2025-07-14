@@ -1,3 +1,4 @@
+/* eslint-disable curly */
 /* eslint-disable react-native/no-inline-styles */
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, ScrollView } from 'react-native';
@@ -11,6 +12,8 @@ import { useUserInfo } from '../../hooks/useUserInfo';
 const JoinRoomScreen = () => {
     const navigation = useNavigation<any>();
     const [playerName, setPlayerName] = useState('');
+    const [totalLevel, setTotalLevel] = useState(10); // Mặc định 10
+    const [roundTime, setRoundTime] = useState(3); // Mặc định 3 giây
     const [roomCodeInput, setRoomCodeInput] = useState('');
     const [loading, setLoading] = useState(false);
     const userInfo = useUserInfo();
@@ -21,9 +24,13 @@ const JoinRoomScreen = () => {
             Alert.alert('Lỗi', 'Bạn cần nhập tên!');
             return;
         }
+        if (isNaN(totalLevel) || totalLevel < 10 || totalLevel > 30) {
+            Alert.alert('Lỗi', 'Tổng số màn chơi phải từ 10 đến 30!');
+            return;
+        }
         setLoading(true);
         try {
-            const { roomCode, playerKey } = await createRoom(playerName.trim(), userInfo?.url);
+            const { roomCode, playerKey } = await createRoom(playerName.trim(), totalLevel, roundTime, userInfo?.url);
             navigation.replace('GameRoom', {
                 roomCode,
                 playerKey,
@@ -73,7 +80,7 @@ const JoinRoomScreen = () => {
                             {/* Block 1: Tạo phòng mới */}
                             <View style={styles.blockSection}>
                                 <Text style={styles.blockTitle}>Tạo phòng mới</Text>
-                                <Text style={styles.helperText}>Nếu chưa có ai tạo phòng, bạn hãy tạo phòng nhé.</Text>
+                                <Text style={styles.helperText}>Một người tạo phòng thui nhé!</Text>
                                 <TextInput
                                     style={styles.input}
                                     placeholder="Nhập tên của bạn"
@@ -81,6 +88,53 @@ const JoinRoomScreen = () => {
                                     onChangeText={setPlayerName}
                                     placeholderTextColor="#aaa"
                                 />
+                                <Text style={{ marginTop: 10, fontWeight: 'bold' }}>Tổng số màn chơi (10-30):</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="10-30"
+                                    keyboardType="numeric"
+                                    value={totalLevel.toString()}
+                                    onChangeText={text => {
+                                        const num = parseInt(text, 10);
+                                        if (!isNaN(num) && num >= 10 && num <= 30) setTotalLevel(num);
+                                        else setTotalLevel(10);
+                                    }}
+                                    maxLength={2}
+                                />
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+                                    <Text style={{ fontWeight: 'bold' }}>Thời gian mỗi màn:</Text>
+                                    <View style={{ flexDirection: 'row', marginLeft: 10}}>
+                                        <TouchableOpacity
+                                            style={{ flexDirection: 'row', alignItems: 'center', marginRight: 20 }}
+                                            onPress={() => setRoundTime(3)}
+                                        >
+                                            <View style={{
+                                                width: 20, height: 20, borderRadius: 10,
+                                                borderWidth: 2, borderColor: MainColor,
+                                                alignItems: 'center', justifyContent: 'center', marginRight: 6,
+                                                backgroundColor: roundTime === 3 ? MainColor : 'transparent'
+                                            }}>
+                                                {roundTime === 3 && <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#fff' }} />}
+                                            </View>
+                                            <Text>3 giây</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={{ flexDirection: 'row', alignItems: 'center' }}
+                                            onPress={() => setRoundTime(5)}
+                                        >
+                                            <View style={{
+                                                width: 20, height: 20, borderRadius: 10,
+                                                borderWidth: 2, borderColor: MainColor,
+                                                alignItems: 'center', justifyContent: 'center', marginRight: 6,
+                                                backgroundColor: roundTime === 5 ? MainColor : 'transparent'
+                                            }}>
+                                                {roundTime === 5 && <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#fff' }} />}
+                                            </View>
+                                            <Text>5 giây</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+
                                 <TouchableOpacity
                                     style={[styles.button, { backgroundColor: MainColor }]}
                                     onPress={handleCreateRoom}
@@ -139,7 +193,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     card: {
-        marginTop: 15,
+        marginTop: 0,
         backgroundColor: '#fff',
         borderRadius: 10,
         padding: 15,
@@ -166,9 +220,9 @@ const styles = StyleSheet.create({
         width: '100%',
         borderWidth: 1.5,
         borderColor: '#b0c4de',
-        borderRadius: 12,
-        padding: 14,
-        marginBottom: 14,
+        borderRadius: 5,
+        padding: 8,
+        marginBottom: 10,
         fontSize: 18,
         backgroundColor: '#f7faff',
         color: '#222',
@@ -177,7 +231,7 @@ const styles = StyleSheet.create({
         backgroundColor: MainColor,
         paddingVertical: 15,
         borderRadius: 50,
-        marginBottom: 14,
+        marginBottom: 10,
         width: '100%',
         alignItems: 'center',
         shadowColor: MainColor,
@@ -228,10 +282,10 @@ const styles = StyleSheet.create({
     },
     blockSection: {
         width: '100%',
-        marginTop: 10,
-        paddingVertical: 12,
+        marginTop: 0,
+        paddingVertical: 10,
         paddingHorizontal: 5,
-        marginBottom: 5,
+        marginBottom: 0,
         borderRadius: 10,
         backgroundColor: '#f7fafd',
         borderWidth: 1,

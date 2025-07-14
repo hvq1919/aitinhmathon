@@ -6,10 +6,10 @@ import {
   get,
   onDisconnect,
 } from 'firebase/database';
-import { getDeviceId, getRandomBaseColor, getRandomString, getRandomTargetIndex, getTargetColor, MainColor } from '../../utils';
+import { getDeviceId, getRandomBaseColor, getRandomString, getRandomTargetIndex, getTargetColor } from '../../utils';
 
 // Tạo phòng mới và thêm chủ phòng
-export const createRoom = async (playerName: string, url?: string) => {
+export const createRoom = async (playerName: string, totalLevel: number, timePerLevel: number, url?: string) => {
   const roomCode = getRandomString();
   const roomRef = ref(db, `rooms/${roomCode}`);
 
@@ -18,6 +18,8 @@ export const createRoom = async (playerName: string, url?: string) => {
   await set(roomRef, {
     status: 'waiting',
     host: playerKey,
+    totalLevel,
+    timePerLevel,
     players: {
       [playerKey]: {
         name: playerName,

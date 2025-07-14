@@ -88,7 +88,7 @@ const GameRoomScreen = () => {
             <Text style={styles.roomCode}>{roomCode}</Text>
             <Icon name="copy" size={18} color={MainColor} style={{ marginLeft: 8 }} />
           </TouchableOpacity>
-          <Text style={styles.infoText}>Chia sẻ mã phòng cho bạn bè để cùng tham gia!</Text>
+          <Text style={styles.infoText}>Hãy kêu bạn bè nhập mã phòng để vào nhé!</Text>
           <Text style={styles.listTitle}>Danh sách người chơi:</Text>
           {loading ? (
             <ActivityIndicator color={MainColor} size="large" style={{ marginVertical: 24 }} />
