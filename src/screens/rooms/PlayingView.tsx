@@ -16,142 +16,102 @@ interface PlayingViewProps {
   players: any;
   hostKey: string;
   playerKey: string;
+  totalLevel: number;
+  timePerLevel: number;
+  roomCode: string;
 }
 
 const TOTAL_TIME = 120;
 
 const MAX_DIFFERENCE = 100;
 
+import { updateGameStateNextLevel } from './roomFunctions';
+
 const PlayingView: React.FC<PlayingViewProps> = ({
   gameState,
   players,
   hostKey,
-  playerKey }) => {
-  // State local cho client
-  const [level, setLevel] = useState(gameState.level || 1);
-  const [score, setScore] = useState(0);
-  const [remainingTime, setRemainingTime] = useState(TOTAL_TIME);
-  const [gameOver, setGameOver] = useState(false);
-  const [currentTarget, setCurrentTarget] = useState(gameState.targetIndex);
-  const [currentBaseColor, setCurrentBaseColor] = useState(gameState.baseColor);
-  const [currentTargetColor, setCurrentTargetColor] = useState(gameState.targetColor);
-  const [currentGridSize, setCurrentGridSize] = useState(gameState.gridSize);
-  const [wrongCount, setWrongCount] = useState(0);
-  const [animating, setAnimating] = useState(false);
-  const [difference, setDifference] = useState(0);
+  playerKey,
+  totalLevel,
+  timePerLevel,
+  roomCode }) => {
+  const { level, baseColor, targetIndex, gridSize } = gameState;
 
-  // Đếm ngược
+  // Local state
+  const [remainingTime, setRemainingTime] = useState(timePerLevel);
+  const [localScore, setLocalScore] = useState(0);
+  const [difference, setDifference] = useState(1);
+  const [answered, setAnswered] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  // Tự động ẩn feedback sau 1s
   useEffect(() => {
-    if (gameOver) return;
-    setRemainingTime(TOTAL_TIME);
-    setDifference(0);
+    if (feedback) {
+      const t = setTimeout(() => setFeedback(null), 1000);
+      return () => clearTimeout(t);
+    }
+  }, [feedback]);
+
+  // Increase difference every second
+  useEffect(() => {
+    setDifference(5);
+    const diffInterval = setInterval(() => {
+      setDifference(prev => (prev < MAX_DIFFERENCE ? prev + 5 : prev));
+    }, 1000);
+    return () => clearInterval(diffInterval);
+  }, [level]);
+
+  // Handle cell press
+  const handlePress = (index: number) => {
+    if (answered) return;
+    if (index === targetIndex) {
+      setLocalScore(s => s + 10);
+      setAnswered(true); // Chỉ khoá khi chọn đúng
+      setFeedback('🎉 Chính xác!');
+    } else {
+      setLocalScore(s => (s > 0 ? s - 5 : 0));
+      setFeedback('❌ Sai rồi!');
+    }
+  };
+
+  useEffect(() => {
+    setRemainingTime(timePerLevel);
+    setAnswered(false); // Cho phép chọn lại ở round mới
+    if (!gameState || !hostKey) return;
+    if (level > totalLevel) return;
     const interval = setInterval(() => {
       setRemainingTime(prev => {
         if (prev <= 1) {
           clearInterval(interval);
-          setGameOver(true);
+          // Host tăng level và update gameState
+          if (roomCode && playerKey === hostKey) updateGameStateNextLevel(roomCode);
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [level, gameOver]);
+  }, [level, timePerLevel, playerKey, hostKey, totalLevel, roomCode]);
 
-  // Mỗi giây tăng difference để màu target ngày càng rõ hơn
-  useEffect(() => {
-    if (gameOver) return;
-    const interval = setInterval(() => {
-      const diff = level > 10 ? 2 : 3;
-      setDifference(prev => Math.min(prev + diff, MAX_DIFFERENCE));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [level, gameOver]);
-
-  // Hàm bắt đầu round mới
-  const startNewRound = () => {
-    const nextLevel = level + 1;
-    const nextGridSize = getGridSizeByLevel(nextLevel, START_GRID_SIZE);
-    const baseColor = getRandomBaseColor();
-    // Khi bắt đầu round mới, difference = 0
-    setDifference(0);
-    const targetColor = getTargetColor(baseColor, 0); // bắt đầu round mới, difference = 0
-    const targetIndex = getRandomTargetIndex(nextGridSize);
-    setLevel(nextLevel);
-    setCurrentGridSize(nextGridSize);
-    setCurrentBaseColor(baseColor);
-    setCurrentTargetColor(targetColor);
-    setCurrentTarget(targetIndex);
-    setGameOver(false);
-    setRemainingTime(TOTAL_TIME);
-    setWrongCount(0);
-    // Có thể reset/tăng score tuỳ luật chơi
-  };
-
-
-  // Xử lý click ô
-  const onPress = (index: number) => {
-    if (gameOver || animating) return;
-    if (index === currentTarget) {
-      setScore(s => s + 10 + remainingTime); // điểm cộng tuỳ luật
-      setAnimating(true);
-      setTimeout(() => {
-        setAnimating(false);
-        startNewRound();
-      }, 700);
-    } else {
-      setWrongCount(w => {
-        if (w >= 1) {
-          setScore(s => Math.max(0, s - 5));
-          setGameOver(true);
-          return 0;
-        }
-        return w + 1;
-      });
-    }
-  };
-
-  // Đang chơi
-  if (!gameOver) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Level {level}</Text>
-        <Text style={styles.timer}>⏰ {remainingTime}s</Text>
-        <Text style={styles.score}>Điểm: {score}</Text>
-        <ColorGrid
-          gridSize={currentGridSize}
-          baseColor={rgbToHex(currentBaseColor.r, currentBaseColor.g, currentBaseColor.b)}
-          targetColor={getTargetColor(currentBaseColor, difference)}
-          targetIndex={currentTarget}
-          onPress={onPress}
-          note={`Độ khác biệt màu: ${difference}`}
-        />
-        <View style={styles.players}>
-          <PlayerListHorizontal
-            players={players}
-            hostKey={hostKey}
-            showScore
-          />
-        </View>
-      </View>
-    );
-  }
-  // Game over
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Hết giờ!</Text>
-      <Text style={styles.score}>Điểm: {score}</Text>
-      <Button title="Chơi lại" onPress={() => {
-        setLevel(1);
-        setScore(0);
-        setGameOver(false);
-        setRemainingTime(TOTAL_TIME);
-        setWrongCount(0);
-        setCurrentGridSize(gameState.gridSize);
-        setCurrentBaseColor(gameState.baseColor);
-        setCurrentTargetColor(gameState.targetColor);
-        setCurrentTarget(gameState.targetIndex);
-      }} />
+      <Text style={styles.title}>Màn {level}/{totalLevel}</Text>
+      <Text style={styles.timer}>⏰ {remainingTime}s</Text>
+      {/* Local state for score and difference */}
+      <Text style={styles.score}>Điểm: {localScore}</Text>
+      <ColorGrid
+        gridSize={gridSize}
+        baseColor={rgbToHex(baseColor.r, baseColor.g, baseColor.b)}
+        targetColor={getTargetColor(baseColor, difference)}
+        targetIndex={targetIndex}
+        onPress={answered ? (() => {}) : handlePress}
+        note={`Độ khác biệt màu: ${difference}`}
+      />
+      {feedback && (
+        <Text style={{ color: feedback.includes('Chính xác') ? '#16a34a' : '#dc2626', fontWeight: 'bold', fontSize: 18, marginVertical: 8 }}>
+          {feedback}
+        </Text>
+      )}
       <View style={styles.players}>
         <PlayerListHorizontal
           players={players}

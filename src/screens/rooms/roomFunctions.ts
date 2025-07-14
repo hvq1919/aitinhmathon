@@ -6,7 +6,7 @@ import {
   get,
   onDisconnect,
 } from 'firebase/database';
-import { getDeviceId, getRandomBaseColor, getRandomString, getRandomTargetIndex, getTargetColor } from '../../utils';
+import { getDeviceId, getGridSizeByLevel, getRandomBaseColor, getRandomString, getRandomTargetIndex, getTargetColor } from '../../utils';
 
 // Tạo phòng mới và thêm chủ phòng
 export const createRoom = async (playerName: string, totalLevel: number, timePerLevel: number, url?: string) => {
@@ -72,7 +72,7 @@ export const startGame = async (roomCode: string) => {
       level: 1,
       baseColor: baseColor,
       gridSize: 5,
-      targetColor: getTargetColor(baseColor, 1),
+      // targetColor: getTargetColor(baseColor, 1),
       targetIndex: getRandomTargetIndex(5),
     },
   });
@@ -106,6 +106,40 @@ export const leaveRoom = async (roomCode: string, playerKey: string) => {
 };
 
 // Kiểm tra nếu phòng trống thì xóa luôn
+// Tăng level và cập nhật gameState (chỉ host gọi)
+export const updateGameStateNextLevel = async (roomCode: string) => {
+  const roomRef = ref(db, `rooms/${roomCode}`);
+  const snapshot = await get(roomRef);
+  if (!snapshot.exists()) return;
+  const roomData = snapshot.val();
+  const prevGameState = roomData.gameState || {};
+  const totalLevel = roomData.totalLevel || 10;
+  const nextLevel = (prevGameState.level || 1) + 1;
+  if (nextLevel > totalLevel) {
+    // Nếu hết màn thì chuyển trạng thái gameOver
+    await update(roomRef, {
+      status: 'gameover',
+      gameState: {
+        ...prevGameState,
+        level: nextLevel,
+      }
+    });
+    return;
+  }
+  const newBaseColor = getRandomBaseColor();
+  const gridSize = getGridSizeByLevel(nextLevel);
+  const targetIndex = getRandomTargetIndex(gridSize);
+  await update(roomRef, {
+    gameState: {
+      ...prevGameState,
+      level: nextLevel,
+      baseColor: newBaseColor,
+      gridSize,
+      targetIndex,
+    }
+  });
+};
+
 export const cleanupRoomIfEmpty = async (roomCode: string) => {
   const playersRef = ref(db, `rooms/${roomCode}/players`);
   const snapshot = await get(playersRef);

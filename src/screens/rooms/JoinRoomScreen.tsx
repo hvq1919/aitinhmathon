@@ -12,7 +12,7 @@ import { useUserInfo } from '../../hooks/useUserInfo';
 const JoinRoomScreen = () => {
     const navigation = useNavigation<any>();
     const [playerName, setPlayerName] = useState('');
-    const [totalLevel, setTotalLevel] = useState(10); // Mặc định 10
+    const [totalLevel, setTotalLevel] = useState('10'); // Mặc định 10
     const [roundTime, setRoundTime] = useState(3); // Mặc định 3 giây
     const [roomCodeInput, setRoomCodeInput] = useState('');
     const [loading, setLoading] = useState(false);
@@ -24,13 +24,14 @@ const JoinRoomScreen = () => {
             Alert.alert('Lỗi', 'Bạn cần nhập tên!');
             return;
         }
-        if (isNaN(totalLevel) || totalLevel < 10 || totalLevel > 30) {
+        const totalLevelNum = parseInt(totalLevel, 10); // Chuyển totalLevel thành số
+        if (isNaN(totalLevelNum) || totalLevelNum < 10 || totalLevelNum > 30) {
             Alert.alert('Lỗi', 'Tổng số màn chơi phải từ 10 đến 30!');
             return;
         }
         setLoading(true);
         try {
-            const { roomCode, playerKey } = await createRoom(playerName.trim(), totalLevel, roundTime, userInfo?.url);
+            const { roomCode, playerKey } = await createRoom(playerName.trim(), totalLevelNum, roundTime, userInfo?.url);
             navigation.replace('GameRoom', {
                 roomCode,
                 playerKey,
@@ -94,11 +95,7 @@ const JoinRoomScreen = () => {
                                     placeholder="10-30"
                                     keyboardType="numeric"
                                     value={totalLevel.toString()}
-                                    onChangeText={text => {
-                                        const num = parseInt(text, 10);
-                                        if (!isNaN(num) && num >= 10 && num <= 30) setTotalLevel(num);
-                                        else setTotalLevel(10);
-                                    }}
+                                    onChangeText={text => setTotalLevel(text)}
                                     maxLength={2}
                                 />
                                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
@@ -299,7 +296,6 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         color: MainColor,
-        marginBottom: 6,
         letterSpacing: 0.5,
         textAlign: 'center',
     },

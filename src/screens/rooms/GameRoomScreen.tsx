@@ -145,6 +145,7 @@ const GameRoomScreen = () => {
           <Text style={[styles.infoText]}>
             🚀 Càng về sau thì <Text style={{ fontWeight: 'bold', color: '#3a57e8' }}>điểm càng cao</Text>.
           </Text>
+          <Text style={[styles.infoText, { marginTop: 8, fontWeight: 'bold', color: '#e83a57', fontSize: 16 }]}>😈 Người thua sẽ bị phạt nhé!</Text>
         </View>
       </>
     );
@@ -160,6 +161,9 @@ const GameRoomScreen = () => {
         players={players}
         hostKey={hostKey}
         playerKey={playerKey}
+        totalLevel={totalLevel}
+        timePerLevel={timePerLevel}
+        roomCode={roomCode}
       />
     );
   };
@@ -179,10 +183,10 @@ const styles = StyleSheet.create({
     paddingTop: 0,
   },
   card: {
-    marginTop: 10,
+    marginTop: 5,
     backgroundColor: '#fff',
     borderRadius: 14,
-    padding: 20,
+    padding: 15,
     width: '92%',
     maxWidth: 400,
     shadowColor: '#000',
