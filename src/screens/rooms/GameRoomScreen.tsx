@@ -23,6 +23,8 @@ const GameRoomScreen = () => {
   const [hostKey, setHostKey] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [gameState, setGameState] = useState<any | null>(null);
+  const [totalLevel, setTotalLevel] = useState(10);
+  const [timePerLevel, setTimePerLevel] = useState(3);
 
   /** Xóa phòng khi rời màn hình */
   useEffect(() => {
@@ -45,6 +47,9 @@ const GameRoomScreen = () => {
       }
       setStatus(data.status);
       setHostKey(data.host);
+      setTotalLevel(data.totalLevel);
+      setTimePerLevel(data.timePerLevel);
+
       if (data.players) {
         const playerList = Object.keys(data.players).map((key) => ({
           key,
@@ -88,7 +93,7 @@ const GameRoomScreen = () => {
             <Text style={styles.roomCode}>{roomCode}</Text>
             <Icon name="copy" size={18} color={MainColor} style={{ marginLeft: 8 }} />
           </TouchableOpacity>
-          <Text style={styles.infoText}>Hãy kêu bạn bè nhập mã phòng để vào nhé!</Text>
+          <Text style={[styles.infoText, { fontSize: 13 }]}>Hãy kêu bạn bè nhập mã phòng để vào nhé!</Text>
           <Text style={styles.listTitle}>Danh sách người chơi:</Text>
           {loading ? (
             <ActivityIndicator color={MainColor} size="large" style={{ marginVertical: 24 }} />
@@ -108,6 +113,38 @@ const GameRoomScreen = () => {
           {!isHost && (
             <DotAnimation message="Đợi chủ phòng bắt đầu game" />
           )}
+        </View>
+        <View
+          style={{
+            marginTop: 20,
+            backgroundColor: '#f0f4ff',
+            borderRadius: 12,
+            padding: 18,
+            shadowColor: '#000',
+            shadowOpacity: 0.06,
+            shadowRadius: 8,
+            shadowOffset: { width: 0, height: 2 },
+            elevation: 2,
+          }}
+        >
+          <Text style={[styles.infoText, { fontWeight: 'bold', fontSize: 18, marginBottom: 8, color: '#3a57e8' }]}>
+            📋 Luật chơi
+          </Text>
+          <Text style={[styles.infoText, { marginBottom: 4 }]}>
+            🕹️ Sẽ có <Text style={{ fontWeight: 'bold', color: '#3a57e8' }}>{totalLevel}</Text> màn chơi.
+          </Text>
+          <Text style={[styles.infoText, { marginBottom: 4 }]}>
+            ⏰ Mỗi màn có <Text style={{ fontWeight: 'bold', color: '#e83a57' }}>{timePerLevel} giây</Text> để chọn.
+          </Text>
+          <Text style={[styles.infoText, { marginBottom: 4 }]}>
+            ⚡ Chọn đúng càng nhanh thì <Text style={{ fontWeight: 'bold', color: '#2ecc40' }}>điểm càng cao</Text>.
+          </Text>
+          <Text style={[styles.infoText, { marginBottom: 4 }]}>
+            ❌ Chọn sai bị <Text style={{ fontWeight: 'bold', color: '#e83a57' }}>trừ điểm</Text>.
+          </Text>
+          <Text style={[styles.infoText]}>
+            🚀 Càng về sau thì <Text style={{ fontWeight: 'bold', color: '#3a57e8' }}>điểm càng cao</Text>.
+          </Text>
         </View>
       </>
     );
@@ -142,7 +179,7 @@ const styles = StyleSheet.create({
     paddingTop: 0,
   },
   card: {
-    marginTop: 20,
+    marginTop: 10,
     backgroundColor: '#fff',
     borderRadius: 14,
     padding: 20,
@@ -180,7 +217,7 @@ const styles = StyleSheet.create({
     letterSpacing: 4,
   },
   infoText: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#888',
     marginBottom: 8,
     textAlign: 'center',
