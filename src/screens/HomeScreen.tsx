@@ -81,6 +81,25 @@ export default function HomeScreen({ navigation }: any) {
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
               <Icon name="users" size={20} color="#fff" style={{ marginRight: 8 }} />
               <Text style={styles.buttonText}>Solo với lũ bạn</Text>
+              {/* Dấu hiệu online */}
+              <View style={{
+                marginLeft: 10,
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: '#eaffea',
+                borderRadius: 8,
+                paddingHorizontal: 6,
+                paddingVertical: 2,
+              }}>
+                <View style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 4,
+                  backgroundColor: '#34c759',
+                  marginRight: 4,
+                }} />
+                <Text style={{ color: '#34c759', fontSize: 12, fontWeight: 'bold' }}>Online</Text>
+              </View>
             </View>
           </TouchableOpacity>
           {/* <TouchableOpacity style={styles.buttonOnline} onPress={() => navigation.navigate('JoinRoom')}>

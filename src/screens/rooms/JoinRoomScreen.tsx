@@ -76,7 +76,7 @@ const JoinRoomScreen = () => {
                     keyboardShouldPersistTaps="handled"
                 >
                     <View style={styles.bg}>
-                        <Header title="🎉 Solo với lũ bạn" navigation={navigation} />
+                        <Header title="🎉 Solo với lũ bạn" navigation={navigation} isOnline />
                         <View style={styles.card}>
                             {/* Block 1: Tạo phòng mới */}
                             <View style={styles.blockSection}>

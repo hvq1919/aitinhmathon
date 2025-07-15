@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
@@ -7,10 +8,11 @@ const Icon = FontAwesome6 as unknown as React.FC<any>;
 interface IProps {
   title: string;
   navigation: any;
+  isOnline?: boolean;
 }
 
 export default function Header(props: IProps) {
-  const { title, navigation } = props;
+  const { title, navigation, isOnline } = props;
 
   return (
     <View style={styles.headerWrap}>
@@ -24,7 +26,25 @@ export default function Header(props: IProps) {
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>{title}</Text>
         {/* Dùng View trống để cân bằng layout */}
-        <View style={{ width: 40 }} />
+        {/* Dấu hiệu online */}
+        {isOnline ? <View style={{
+          marginLeft: 8,
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: '#eaffea',
+          borderRadius: 8,
+          paddingHorizontal: 6,
+          paddingVertical: 2,
+        }}>
+          <View style={{
+            width: 8,
+            height: 8,
+            borderRadius: 4,
+            backgroundColor: '#34c759',
+            marginRight: 4,
+          }} />
+          <Text style={{ color: '#34c759', fontSize: 12, fontWeight: 'bold' }}>Online</Text>
+        </View> : <View style={{ width: 40 }} />}
       </View>
     </View>
   );

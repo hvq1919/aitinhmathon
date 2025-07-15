@@ -15,7 +15,7 @@ export default function HelpScreen({ navigation }: any) {
     return (
         <ScrollView>
             <View style={styles.container}>
-                <Text style={[styles.title, { color: '#3a57e8', marginBottom: 18 }]}>📖 Hướng dẫn</Text>
+                <Text style={[styles.title, { color: '#3a57e8', marginBottom: 10 }]}>📖 Hướng dẫn</Text>
                 <View
                     style={{
                         backgroundColor: '#f0f4ff',
@@ -50,9 +50,30 @@ export default function HelpScreen({ navigation }: any) {
                         elevation: 1,
                     }}
                 >
-                    <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#ff9800', marginBottom: 8 }}>
-                        👫 Solo với lũ bạn
-                    </Text>
+                    <View style={{ marginBottom: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#ff9800', }}>
+                            👫 Solo với lũ bạn
+                        </Text>
+                        {/* Dấu hiệu online */}
+                        <View style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            backgroundColor: '#eaffea',
+                            borderRadius: 8,
+                            paddingHorizontal: 6,
+                            paddingVertical: 2,
+                        }}>
+                            <View style={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: 4,
+                                backgroundColor: '#34c759',
+                                marginRight: 4,
+                            }} />
+                            <Text style={{ color: '#34c759', fontSize: 12, fontWeight: 'bold' }}>Online</Text>
+                        </View>
+                    </View>
+
                     <Text style={[styles.helpText, { color: '#555', marginBottom: 6 }]}>• Một bạn tạo phòng, sau đó các bạn khác nhập mã phòng để vào phòng.</Text>
                     <Text style={[styles.helpText, { color: '#555', marginBottom: 6 }]}>• <Text style={{ fontWeight: 'bold', color: '#e83a57' }}>Người cao điểm nhất</Text> sẽ được làm gì đó với <Text style={{ fontWeight: 'bold', color: '#3a57e8' }}>người thấp điểm nhất</Text>.</Text>
                     <Text style={[styles.helpText, { color: '#3a57e8', fontWeight: 'bold' }]}>👉 Hãy click nhanh và đúng nhé!</Text>
