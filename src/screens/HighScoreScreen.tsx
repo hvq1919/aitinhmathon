@@ -58,7 +58,7 @@ export default function HighScoreScreen({ navigation }: any) {
         const bgColor = item.id === deviceId ? '#b2ebf2' : '#fff';
         return (
             <>
-                <View style={[styles.item, { backgroundColor: bgColor }]}>
+                <TouchableOpacity activeOpacity={0.85} style={[styles.item, { backgroundColor: bgColor }]}>
                     <Text style={styles.rank}>{medal}</Text>
                     {isEmpty(item.url) ? <AvatarIcon size={48} style={styles.avatar} /> :
                         <Image source={{ uri: item.url }} style={styles.avatar} />}
@@ -67,7 +67,7 @@ export default function HighScoreScreen({ navigation }: any) {
                         <Text style={styles.score}>🏆 {item.high_score}</Text>
                     </View>
 
-                </View>
+                </TouchableOpacity>
                 {(index >= users.length - 1) && notInLimit && (
                     <View style={{marginBottom: 20, marginTop: 5, alignItems: 'center'}}>
                         <Text >{`Bạn xếp ngoài Top ${users.length}`}</Text>
@@ -115,6 +115,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
     },
     header: {
+        marginTop: 5,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',

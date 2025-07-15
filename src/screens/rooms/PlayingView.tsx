@@ -1,15 +1,10 @@
+/* eslint-disable curly */
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, StatusBar, Button } from 'react-native';
+import { View, Text, StyleSheet, StatusBar } from 'react-native';
 import { ColorGrid } from '../../components/ColorGrid';
-import { MainColor, rgbToHex, getRandomBaseColor, getTargetColor, getRandomTargetIndex, getGridSizeByLevel } from '../../utils';
+import { MainColor, rgbToHex, getTargetColor } from '../../utils';
 import PlayerListHorizontal from '../../components/PlayerListHorizontal';
-import { START_GRID_SIZE } from '../../constant';
 
-interface UserHighScore {
-  key: string;
-  name: string;
-  highScore: number;
-}
 
 interface PlayingViewProps {
   gameState: any;
@@ -21,9 +16,8 @@ interface PlayingViewProps {
   roomCode: string;
 }
 
-const TOTAL_TIME = 120;
-
 const MAX_DIFFERENCE = 100;
+const COLOR_DIFF = 3;
 
 import { updateGameStateNextLevel } from './roomFunctions';
 
@@ -40,7 +34,7 @@ const PlayingView: React.FC<PlayingViewProps> = ({
   // Local state
   const [remainingTime, setRemainingTime] = useState(timePerLevel);
   const [localScore, setLocalScore] = useState(0);
-  const [difference, setDifference] = useState(1);
+  const [difference, setDifference] = useState(COLOR_DIFF + 2);
   const [answered, setAnswered] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -52,27 +46,27 @@ const PlayingView: React.FC<PlayingViewProps> = ({
     }
   }, [feedback]);
 
-  // Increase difference every second
-  useEffect(() => {
-    setDifference(5);
-    const diffInterval = setInterval(() => {
-      setDifference(prev => (prev < MAX_DIFFERENCE ? prev + 5 : prev));
-    }, 1000);
-    return () => clearInterval(diffInterval);
-  }, [level]);
-
   // Handle cell press
   const handlePress = (index: number) => {
     if (answered) return;
+
     if (index === targetIndex) {
-      setLocalScore(s => s + 10);
-      setAnswered(true); // Chỉ khoá khi chọn đúng
+      const base = level < 5 ? 15 : level * 3;
+      const bonus = remainingTime * 5;
+      const totalAdd = Math.round((base + bonus) / 10) * 10;
+      setLocalScore(s => Math.round((s + totalAdd) / 10) * 10);
+      setAnswered(true); // Khóa sau khi đúng
       setFeedback('🎉 Chính xác!');
     } else {
-      setLocalScore(s => (s > 0 ? s - 5 : 0));
+      const penalty = level > 20 ? 20 : 10;
+      setLocalScore(s => {
+        const newScore = Math.max(0, s - penalty);
+        return Math.round(newScore / 10) * 10;
+      });
       setFeedback('❌ Sai rồi!');
     }
   };
+
 
   useEffect(() => {
     setRemainingTime(timePerLevel);
@@ -83,15 +77,18 @@ const PlayingView: React.FC<PlayingViewProps> = ({
       setRemainingTime(prev => {
         if (prev <= 1) {
           clearInterval(interval);
+          setDifference(COLOR_DIFF + 2);
           // Host tăng level và update gameState
           if (roomCode && playerKey === hostKey) updateGameStateNextLevel(roomCode);
           return 0;
         }
         return prev - 1;
       });
+      // Tăng độ khác biệt mỗi giây
+      setDifference(prev => (prev < MAX_DIFFERENCE ? prev + COLOR_DIFF : prev));
     }, 1000);
     return () => clearInterval(interval);
-  }, [level, timePerLevel, playerKey, hostKey, totalLevel, roomCode]);
+  }, [level, timePerLevel, playerKey, hostKey, totalLevel, roomCode, gameState]);
 
   return (
     <View style={styles.container}>
@@ -104,7 +101,7 @@ const PlayingView: React.FC<PlayingViewProps> = ({
         baseColor={rgbToHex(baseColor.r, baseColor.g, baseColor.b)}
         targetColor={getTargetColor(baseColor, difference)}
         targetIndex={targetIndex}
-        onPress={answered ? (() => {}) : handlePress}
+        onPress={answered ? (() => { }) : handlePress}
         note={`Độ khác biệt màu: ${difference}`}
       />
       {feedback && (

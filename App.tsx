@@ -39,7 +39,7 @@ export default function App() {
         <Stack.Screen
           name="Help"
           component={HelpScreen}
-          options={{ title: 'Hướng dẫn' }}
+          options={{ title: 'Hướng dẫn', headerShown: false }}
         />
         <Stack.Screen
           name="GameRoom"
