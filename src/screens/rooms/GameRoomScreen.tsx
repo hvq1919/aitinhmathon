@@ -67,7 +67,7 @@ const GameRoomScreen = () => {
       }
     });
     return () => unsubscribe();
-  }, [roomCode, playerKey, playerName, navigation]);
+  }, [roomCode, playerKey, playerName]);
 
   const handleStartGame = async () => {
     if (players.length < 2) {
@@ -85,35 +85,40 @@ const GameRoomScreen = () => {
   const waitingView = () => {
     return (
       <>
-        <Header title="Phòng chờ" navigation={navigation} />
+        <Header title={status === 'gameover' ? '⏰ Hết giờ' : 'Phòng chờ'} navigation={navigation} />
         <View style={styles.card}>
           <Text style={styles.roomCodeLabel}>MÃ PHÒNG</Text>
           <TouchableOpacity style={styles.roomCodeBox} onPress={handleCopyRoomCode} activeOpacity={0.7}>
             <Text style={styles.roomCode}>{roomCode}</Text>
             <Icon name="copy" size={18} color={MainColor} style={{ marginLeft: 8 }} />
           </TouchableOpacity>
-          <Text style={[styles.infoText, { fontSize: 13 }]}>Hãy kêu bạn bè nhập mã phòng để vào nhé!</Text>
-          <Text style={styles.listTitle}>Danh sách người chơi:</Text>
+          {status === 'waiting' && (
+            <>
+              <Text style={[styles.infoText, { fontSize: 13 }]}>Hãy kêu bạn bè nhập mã phòng để vào nhé!</Text>
+              <Text style={styles.listTitle}>Danh sách người chơi:</Text>
+            </>
+          )}
+
           {loading ? (
             <ActivityIndicator color={MainColor} size="large" style={{ marginVertical: 24 }} />
           ) : (
             <PlayerListHorizontal
               players={players}
               hostKey={hostKey}
-              showScore={status === 'playing'}
+              showScore={status !== 'waiting'}
             />
           )}
-          {isHost && status === 'waiting' && (
+          {isHost && status !== 'playing' && (
             <TouchableOpacity style={[styles.startBtn, { backgroundColor: MainColor }]} onPress={handleStartGame} activeOpacity={0.8}>
               <Icon name="play" size={20} color="#fff" style={{ marginRight: 8 }} />
-              <Text style={styles.startBtnText}>Bắt đầu</Text>
+              <Text style={styles.startBtnText}>{status === 'waiting' ? 'Bắt đầu' : 'Chơi lại'}</Text>
             </TouchableOpacity>
           )}
           {!isHost && (
             <DotAnimation message="Đợi chủ phòng bắt đầu game" />
           )}
         </View>
-        <View
+        {status === 'waiting' && <View
           style={{
             marginTop: 20,
             backgroundColor: '#f0f4ff',
@@ -145,7 +150,10 @@ const GameRoomScreen = () => {
             🚀 Càng về sau thì <Text style={{ fontWeight: 'bold', color: '#3a57e8' }}>điểm càng cao</Text>.
           </Text>
           <Text style={[styles.infoText, { marginTop: 8, fontWeight: 'bold', color: '#e83a57', fontSize: 16 }]}>😈 Người thua sẽ bị phạt nhé!</Text>
-        </View>
+        </View>}
+        {
+          // TODO Hình phạt
+        }
       </>
     );
   };
@@ -166,6 +174,7 @@ const GameRoomScreen = () => {
       />
     );
   };
+
 
   return (
     <View style={styles.bg}>
