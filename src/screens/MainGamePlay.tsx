@@ -20,7 +20,7 @@ import GameOver from '../components/GameOver';
 import { loadSounds, playCorrect, playWrong, playWin, releaseSounds } from '../soundManager';
 
 
-const TOTAL_TIME = 20; // 2 phút
+const TOTAL_TIME = 100; // 100s
 
 export default function MainGamePlay({ navigation }: any) {
     const [level, setLevel] = useState(1);

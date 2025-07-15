@@ -12,8 +12,8 @@ import { useUserInfo } from '../../hooks/useUserInfo';
 const JoinRoomScreen = () => {
     const navigation = useNavigation<any>();
     const [playerName, setPlayerName] = useState('');
-    const [totalLevel, setTotalLevel] = useState('10'); // Mặc định 10
-    const [roundTime, setRoundTime] = useState(3); // Mặc định 3 giây
+    const [totalLevel, setTotalLevel] = useState('20'); // Mặc định 20
+    const [roundTime, setRoundTime] = useState(5); // Mặc định 5 giây
     const [roomCodeInput, setRoomCodeInput] = useState('');
     const [loading, setLoading] = useState(false);
     const userInfo = useUserInfo();
