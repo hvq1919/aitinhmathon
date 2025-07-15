@@ -1,9 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable curly */
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, StatusBar } from 'react-native';
 import { ColorGrid } from '../../components/ColorGrid';
 import { MainColor, rgbToHex, getTargetColor } from '../../utils';
 import PlayerListHorizontal from '../../components/PlayerListHorizontal';
+import { updateCurrentPlayerScore, updateGameStateNextLevel } from './roomFunctions';
 
 
 interface PlayingViewProps {
@@ -19,7 +21,6 @@ interface PlayingViewProps {
 const MAX_DIFFERENCE = 100;
 const COLOR_DIFF = 3;
 
-import { updateGameStateNextLevel } from './roomFunctions';
 
 const PlayingView: React.FC<PlayingViewProps> = ({
   gameState,
@@ -46,6 +47,32 @@ const PlayingView: React.FC<PlayingViewProps> = ({
     }
   }, [feedback]);
 
+  useEffect(() => {
+    updateCurrentPlayerScore(roomCode, playerKey, localScore);
+  }, [localScore]);
+
+  useEffect(() => {
+    setRemainingTime(timePerLevel);
+    setAnswered(false); // Cho phép chọn lại ở round mới
+    if (!gameState || !hostKey) return;
+    if (level > totalLevel) return;
+    const interval = setInterval(() => {
+      setRemainingTime(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setDifference(COLOR_DIFF + 2);
+
+          if (roomCode && playerKey === hostKey) updateGameStateNextLevel(roomCode, totalLevel, level + 1);
+          return 0;
+        }
+        return prev - 1;
+      });
+      // Tăng độ khác biệt mỗi giây
+      setDifference(prev => (prev < MAX_DIFFERENCE ? prev + COLOR_DIFF : prev));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [level]);
+
   // Handle cell press
   const handlePress = (index: number) => {
     if (answered) return;
@@ -66,29 +93,6 @@ const PlayingView: React.FC<PlayingViewProps> = ({
       setFeedback('❌ Sai rồi!');
     }
   };
-
-
-  useEffect(() => {
-    setRemainingTime(timePerLevel);
-    setAnswered(false); // Cho phép chọn lại ở round mới
-    if (!gameState || !hostKey) return;
-    if (level > totalLevel) return;
-    const interval = setInterval(() => {
-      setRemainingTime(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          setDifference(COLOR_DIFF + 2);
-          // Host tăng level và update gameState
-          if (roomCode && playerKey === hostKey) updateGameStateNextLevel(roomCode);
-          return 0;
-        }
-        return prev - 1;
-      });
-      // Tăng độ khác biệt mỗi giây
-      setDifference(prev => (prev < MAX_DIFFERENCE ? prev + COLOR_DIFF : prev));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [level, timePerLevel, playerKey, hostKey, totalLevel, roomCode, gameState]);
 
   return (
     <View style={styles.container}>

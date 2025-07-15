@@ -10,7 +10,7 @@ interface Player {
   key: string;
   name: string;
   url?: string;
-  highScore?: number;
+  score?: number;
 }
 
 interface Props {
@@ -21,7 +21,7 @@ interface Props {
 
 const PlayerListHorizontal: React.FC<Props> = ({ players, hostKey, showScore = false }) => {
   // Chủ phòng đứng đầu
-  const sortedPlayers = showScore ? [...players].sort((a: any, b: any) => b.highScore - a.highScore)
+  const sortedPlayers = showScore ? [...players].sort((a: any, b: any) => b.score - a.score)
     : [...players.filter((p) => p.key === hostKey),
     ...players.filter((p) => p.key !== hostKey),
     ];
@@ -53,7 +53,7 @@ const PlayerListHorizontal: React.FC<Props> = ({ players, hostKey, showScore = f
               {item.name}
             </Text>
             {showScore && <Text style={styles.playerScore}>
-              <Icon name="trophy" size={12} color={MainColor} /> {item.highScore ?? 0}
+              <Icon name="trophy" size={12} color={MainColor} /> {item.score ?? 0}
             </Text>}
           </View>
         );

@@ -18,7 +18,7 @@ const GameRoomScreen = () => {
   const navigation = useNavigation<any>();
   const { roomCode, playerKey, playerName, isHost } = route.params;
 
-  const [players, setPlayers] = useState<{ key: string; name: string; highScore?: number; score?: number }[]>([]);
+  const [players, setPlayers] = useState<{ key: string; name: string; score?: number; }[]>([]);
   const [status, setStatus] = useState('waiting');
   const [hostKey, setHostKey] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -54,7 +54,6 @@ const GameRoomScreen = () => {
         const playerList = Object.keys(data.players).map((key) => ({
           key,
           name: data.players[key].name,
-          highScore: data.players[key].highScore,
           score: data.players[key].score,
           url: data.players[key].url,
         }));

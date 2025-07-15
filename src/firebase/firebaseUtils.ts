@@ -48,28 +48,6 @@ export const updateFacebookUser = async (userData: {
     }
 };
 
-
-export const updateGameState = async (
-    roomId: string,
-    gameState: any,
-    level: number,
-    players: any,
-    playerKey: string,
-    highScore: number
-) => {
-    const currentPlayer = players.find((p: any) => p.key === playerKey);
-    if (currentPlayer) {
-        currentPlayer.highScore = highScore;
-    }
-    const roomRef = doc(firestore, 'rooms', roomId);
-    await updateDoc(roomRef, {
-        gameState,
-        level,
-        players,
-        updateAt: new Date().toISOString(),
-    });
-};
-
 export const deleteAllUsers = async () => {
     const usersRef = collection(firestore, 'users');
     const snapshot = await getDocs(usersRef);

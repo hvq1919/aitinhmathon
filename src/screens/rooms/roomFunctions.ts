@@ -1,3 +1,4 @@
+/* eslint-disable curly */
 import { db } from '../../firebase/firebaseConfig';
 import {
   ref,
@@ -6,7 +7,7 @@ import {
   get,
   onDisconnect,
 } from 'firebase/database';
-import { getDeviceId, getGridSizeByLevel, getRandomBaseColor, getRandomString, getRandomTargetIndex, getTargetColor } from '../../utils';
+import { getDeviceId, getGridSizeByLevel, getRandomBaseColor, getRandomString, getRandomTargetIndex } from '../../utils';
 
 // Tạo phòng mới và thêm chủ phòng
 export const createRoom = async (playerName: string, totalLevel: number, timePerLevel: number, url?: string) => {
@@ -23,7 +24,7 @@ export const createRoom = async (playerName: string, totalLevel: number, timePer
     players: {
       [playerKey]: {
         name: playerName,
-        highScore: 0,
+        score: 0,
         url: url ?? '',
       },
     },
@@ -52,7 +53,7 @@ export const joinRoom = async (
 
   await set(ref(db, `rooms/${roomCode}/players/${playerKey}`), {
     name: playerName,
-    highScore: 0,
+    score: 0,
     url: url ?? '',
   });
 
@@ -63,11 +64,11 @@ export const joinRoom = async (
 };
 
 // Bắt đầu game (chỉ chủ phòng gọi)
-export const startGame = async (roomCode: string) => {
+export const startGame = async (roomCode: string, status: string = 'playing') => {
   const roomRef = ref(db, `rooms/${roomCode}`);
   const baseColor = getRandomBaseColor();
   await update(roomRef, {
-    status: 'playing',
+    status,
     gameState: {
       level: 1,
       baseColor: baseColor,
@@ -105,41 +106,6 @@ export const leaveRoom = async (roomCode: string, playerKey: string) => {
   }
 };
 
-// Kiểm tra nếu phòng trống thì xóa luôn
-// Tăng level và cập nhật gameState (chỉ host gọi)
-export const updateGameStateNextLevel = async (roomCode: string) => {
-  const roomRef = ref(db, `rooms/${roomCode}`);
-  const snapshot = await get(roomRef);
-  if (!snapshot.exists()) return;
-  const roomData = snapshot.val();
-  const prevGameState = roomData.gameState || {};
-  const totalLevel = roomData.totalLevel || 10;
-  const nextLevel = (prevGameState.level || 1) + 1;
-  if (nextLevel > totalLevel) {
-    // Nếu hết màn thì chuyển trạng thái gameOver
-    await update(roomRef, {
-      status: 'gameover',
-      gameState: {
-        ...prevGameState,
-        level: nextLevel,
-      }
-    });
-    return;
-  }
-  const newBaseColor = getRandomBaseColor();
-  const gridSize = getGridSizeByLevel(nextLevel);
-  const targetIndex = getRandomTargetIndex(gridSize);
-  await update(roomRef, {
-    gameState: {
-      ...prevGameState,
-      level: nextLevel,
-      baseColor: newBaseColor,
-      gridSize,
-      targetIndex,
-    }
-  });
-};
-
 export const cleanupRoomIfEmpty = async (roomCode: string) => {
   const playersRef = ref(db, `rooms/${roomCode}/players`);
   const snapshot = await get(playersRef);
@@ -147,4 +113,35 @@ export const cleanupRoomIfEmpty = async (roomCode: string) => {
     const roomRef = ref(db, `rooms/${roomCode}`);
     await set(roomRef, null);
   }
+};
+
+/**
+ * Cập nhật score cho currentPlayer trong room (Realtime Database)
+ * @param roomCode mã phòng
+ * @param playerKey key của player (thường là deviceId)
+ * @param score điểm mới
+ */
+export const updateCurrentPlayerScore = async (roomCode: string, playerKey: string, score: number) => {
+  const playerRef = ref(db, `rooms/${roomCode}/players/${playerKey}`);
+  await update(playerRef, { score });
+};
+
+// Tăng level và cập nhật gameState (chỉ host gọi)
+export const updateGameStateNextLevel = async (roomCode: string, totalLevel: number, nextLevel: number) => {
+  if (nextLevel > totalLevel) {
+    startGame(roomCode, 'gameover');
+    return;
+  }
+
+  // Nếu chưa hết màn thì chỉ update nhánh gameState
+  const gameStateRef = ref(db, `rooms/${roomCode}/gameState`);
+  const newBaseColor = getRandomBaseColor();
+  const gridSize = getGridSizeByLevel(nextLevel);
+  const targetIndex = getRandomTargetIndex(gridSize);
+  await update(gameStateRef, {
+    level: nextLevel,
+    baseColor: newBaseColor,
+    gridSize,
+    targetIndex,
+  });
 };
