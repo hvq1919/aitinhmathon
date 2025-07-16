@@ -48,10 +48,6 @@ const PlayingView: React.FC<PlayingViewProps> = ({
   }, [feedback]);
 
   useEffect(() => {
-    updateCurrentPlayerScore(roomCode, playerKey, localScore);
-  }, [localScore]);
-
-  useEffect(() => {
     setRemainingTime(timePerLevel);
     setAnswered(false); // Cho phép chọn lại ở round mới
     if (!gameState || !hostKey) return;
@@ -81,15 +77,16 @@ const PlayingView: React.FC<PlayingViewProps> = ({
       const base = level < 5 ? 15 : level * 3;
       const bonus = remainingTime * 5;
       const totalAdd = Math.round((base + bonus) / 10) * 10;
-      setLocalScore(s => Math.round((s + totalAdd) / 10) * 10);
+      const newScore = Math.round((localScore + totalAdd) / 10) * 10;
+      setLocalScore(newScore);
+      updateCurrentPlayerScore(roomCode, playerKey, newScore);
       setAnswered(true); // Khóa sau khi đúng
       setFeedback('🎉 Chính xác!');
     } else {
       const penalty = level > 20 ? 20 : 10;
-      setLocalScore(s => {
-        const newScore = Math.max(0, s - penalty);
-        return Math.round(newScore / 10) * 10;
-      });
+      const newScore = Math.max(0, localScore - penalty);
+      setLocalScore(newScore);
+      updateCurrentPlayerScore(roomCode, playerKey, newScore);
       setFeedback('❌ Sai rồi!');
     }
   };

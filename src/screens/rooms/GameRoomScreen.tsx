@@ -11,6 +11,7 @@ import Header from '../../components/Header';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { db } from '../../firebase/firebaseConfig';
 import { DotAnimation } from '../../components/DotAnimation';
+import PenaltyMessageView from './PenaltyMessageView';
 const Icon = FontAwesome6 as unknown as React.FC<any>;
 
 const GameRoomScreen = () => {
@@ -151,12 +152,30 @@ const GameRoomScreen = () => {
           </Text>
           <Text style={[styles.infoText, { marginTop: 8, fontWeight: 'bold', color: '#e83a57', fontSize: 16 }]}>😈 Người thua sẽ bị phạt nhé!</Text>
         </View>}
-        {
-          // TODO Hình phạt
-        }
+        {status === 'gameover' && players.length >= 2 && (
+          <View style={{
+            marginHorizontal: 10,
+            marginTop: 15,
+            backgroundColor: '#fffbe7',
+            borderRadius: 8,
+            padding: 10,
+            alignItems: 'center',
+            shadowColor: '#000',
+            shadowOpacity: 0.07,
+            shadowRadius: 8,
+            shadowOffset: { width: 0, height: 2 },
+            elevation: 2,
+          }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 18, color: '#D32F2F', marginBottom: 8 }}>🎲 Hình phạt cho người thua</Text>
+            {/* Random 1 hình phạt từ roomSoloMessages */}
+            {isHost && <PenaltyMessageView players={players} />}
+            {!isHost && <Text style={{ fontSize: 14, color: '#444', marginTop: 8, textAlign: 'center' }}>Xem hình phạt bên máy chủ phòng</Text>}
+          </View>
+        )}
       </>
     );
   };
+
 
   const playingView = () => {
 
