@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Clipboard } from 'react-native';
@@ -12,6 +13,7 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { db } from '../../firebase/firebaseConfig';
 import { DotAnimation } from '../../components/DotAnimation';
 import PenaltyMessageView from './PenaltyMessageView';
+import { loadSounds, releaseSounds, playWin } from '../../soundManager';
 const Icon = FontAwesome6 as unknown as React.FC<any>;
 
 const GameRoomScreen = () => {
@@ -27,12 +29,21 @@ const GameRoomScreen = () => {
   const [totalLevel, setTotalLevel] = useState(10);
   const [timePerLevel, setTimePerLevel] = useState(3);
 
+  // Play win sound when gameover
+  useEffect(() => {
+    if (status === 'gameover') {
+      playWin();
+    }
+  }, [status]);
+
   /** Xóa phòng khi rời màn hình */
   useEffect(() => {
+    loadSounds();
     return () => {
       if (roomCode && playerKey) {
         leaveRoom(roomCode, playerKey);
       }
+      releaseSounds(); // cleanup
     };
   }, [roomCode, playerKey]);
 
@@ -84,6 +95,7 @@ const GameRoomScreen = () => {
   };
 
   const waitingView = () => {
+    const reStart = status === 'gameover' ? 'bấm chơi lại' : 'bắt đầu';
     return (
       <>
         <Header title={status === 'gameover' ? '⏰ Hết giờ' : 'Phòng chờ'} navigation={navigation} />
@@ -116,7 +128,7 @@ const GameRoomScreen = () => {
             </TouchableOpacity>
           )}
           {!isHost && (
-            <DotAnimation message="Đợi chủ phòng bắt đầu game" />
+            <DotAnimation message={`Đợi chủ phòng ${reStart} game`} />
           )}
         </View>
         {status === 'waiting' && <View

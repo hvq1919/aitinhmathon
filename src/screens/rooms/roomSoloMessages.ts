@@ -1,3 +1,5 @@
+import { shuffle } from 'lodash';
+
 const roomSoloMessages = [
   'Búng mũi 1 phát, nhẹ thui à 🤭',
   'Tét đít 1 phát 🍑',
@@ -14,4 +16,4 @@ const roomSoloMessages = [
   'Bắt người thua Vẽ hình mặt cười lên tay ✍️😊',
 ];
 
-export default roomSoloMessages;
+export default shuffle(roomSoloMessages);

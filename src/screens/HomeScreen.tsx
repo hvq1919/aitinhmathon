@@ -11,6 +11,8 @@ import { PressableButton } from '../components/PressableButton';
 import { MainColor } from '../utils';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 const Icon = FontAwesome6 as unknown as React.FC<any>;
+import NetInfo from '@react-native-community/netinfo';
+import { Alert } from 'react-native';
 
 export default function HomeScreen({ navigation }: any) {
   const [highScore, setHighScore] = useState(0);
@@ -77,7 +79,17 @@ export default function HomeScreen({ navigation }: any) {
               <Text style={styles.buttonText}>Hướng dẫn</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.buttonOnline, { marginTop: 50 }]} onPress={() => navigation.navigate('JoinRoom')}>
+          <TouchableOpacity
+            style={[styles.buttonOnline, { marginTop: 50 }]}
+            onPress={async () => {
+              const state = await NetInfo.fetch();
+              if (!state.isConnected) {
+                Alert.alert('Không có kết nối Internet', 'Vui lòng kiểm tra lại mạng trước khi vào phòng.');
+                return;
+              }
+              navigation.navigate('JoinRoom');
+            }}
+          >
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
               <Icon name="users" size={20} color="#fff" style={{ marginRight: 8 }} />
               <Text style={styles.buttonText}>Solo với lũ bạn</Text>

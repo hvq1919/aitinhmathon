@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable curly */
 import React, { useEffect, useState } from 'react';
@@ -6,6 +7,7 @@ import { ColorGrid } from '../../components/ColorGrid';
 import { MainColor, rgbToHex, getTargetColor } from '../../utils';
 import PlayerListHorizontal from '../../components/PlayerListHorizontal';
 import { updateCurrentPlayerScore, updateGameStateNextLevel } from './roomFunctions';
+import { playCorrect, playWrong } from '../../soundManager';
 
 
 interface PlayingViewProps {
@@ -74,6 +76,7 @@ const PlayingView: React.FC<PlayingViewProps> = ({
     if (answered) return;
 
     if (index === targetIndex) {
+      playCorrect();
       const base = level < 5 ? 15 : level * 3;
       const bonus = remainingTime * 5;
       const totalAdd = Math.round((base + bonus) / 10) * 10;
@@ -83,6 +86,7 @@ const PlayingView: React.FC<PlayingViewProps> = ({
       setAnswered(true); // Khóa sau khi đúng
       setFeedback('🎉 Chính xác!');
     } else {
+      playWrong();
       const penalty = level > 20 ? 20 : 10;
       const newScore = Math.max(0, localScore - penalty);
       setLocalScore(newScore);
