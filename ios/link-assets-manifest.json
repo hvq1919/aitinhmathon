@@ -1,0 +1,21 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/Caveat.ttf",
+      "sha1": "dbe978deb63f59463ae640d9f04725142c3babb8"
+    },
+    {
+      "path": "src/assets/fonts/Lemon.ttf",
+      "sha1": "5e00b576eacfe22a89213f723d07335c0dc1d7dc"
+    },
+    {
+      "path": "src/assets/fonts/Pacifico.ttf",
+      "sha1": "dbe978deb63f59463ae640d9f04725142c3babb8"
+    },
+    {
+      "path": "src/assets/fonts/Regular.ttf",
+      "sha1": "b4044c9c8c7bba944d42c27d77c7ba481c53d5b1"
+    }
+  ]
+}

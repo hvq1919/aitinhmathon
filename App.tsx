@@ -9,6 +9,7 @@ import HighScoreScreen from './src/screens/HighScoreScreen';
 import HelpScreen from './src/screens/HelpScreen';
 import GameRoomScreen from './src/screens/rooms/GameRoomScreen';
 import JoinRoomScreen from './src/screens/rooms/JoinRoomScreen';
+import Find100Number from './src/screens/Find100Number';
 
 const Stack = createStackNavigator();
 
@@ -20,35 +21,12 @@ export default function App() {
   }, []);
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="Find100Number">
         <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ title: 'Ai Tinh Mắt Hơn', headerShown: false }}
+          name="Find100Number"
+          component={Find100Number}
+          options={{ title: 'Tim so 100', headerShown: false }}
         />
-        <Stack.Screen
-          name="Game"
-          component={MainGamePlay}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="HighScore"
-          component={HighScoreScreen}
-          options={{ title: 'Điểm cao', headerShown: false }}
-        />
-        <Stack.Screen
-          name="Help"
-          component={HelpScreen}
-          options={{ title: 'Hướng dẫn', headerShown: false }}
-        />
-        <Stack.Screen
-          name="GameRoom"
-          component={GameRoomScreen}
-          options={{ title: 'Game Room', headerShown: false }} />
-        <Stack.Screen
-          name="JoinRoom"
-          component={JoinRoomScreen}
-          options={{ title: 'Tạo / Vào phòng đấu online', headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
