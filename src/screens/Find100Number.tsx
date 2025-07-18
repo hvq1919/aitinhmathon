@@ -1,6 +1,16 @@
 /* eslint-disable curly */
 /* eslint-disable react-native/no-inline-styles */
 import React, { useState, useEffect } from 'react';
+import { Dimensions, PixelRatio, Platform } from 'react-native';
+
+const DeviceWidth = Dimensions.get('window').width;
+const guidelineBaseWidth = 360; // Android phổ biến
+function normalize(size: number) {
+    if (Platform.OS !== 'android') return size; // chỉ scale trên Android
+    const scale = DeviceWidth / guidelineBaseWidth;
+    const newSize = size * scale;
+    return Math.round(PixelRatio.roundToNearestPixel(newSize));
+}
 import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Animated } from 'react-native';
 import Svg, { G, Path } from 'react-native-svg';
 
@@ -25,17 +35,14 @@ const COLORS = [
     '#22d3ee', // xanh cyan
 ];
 
-const A4_WIDTH = 390; // px (mobile), scale lại cho vừa màn hình
-const A4_HEIGHT = 700;
+const A4_WIDTH = DeviceWidth; // px (mobile), scale lại cho vừa màn hình
+const A4_HEIGHT = DeviceWidth * 1.7;
 const NUMBER_SIZE = 32;
 
 export default function Find100Number() {
     const [numbers, setNumbers] = useState<NumberItem[]>([]);
     const [selected, setSelected] = useState<number[]>([]);
     const [current, setCurrent] = useState(1);
-    const [startTime, setStartTime] = useState<Date | null>(null);
-    const [elapsed, setElapsed] = useState(0);
-    const [wrong, setWrong] = useState<number | null>(null);
 
     const lastSelected = selected[selected.length - 1];
 
@@ -43,46 +50,38 @@ export default function Find100Number() {
     useEffect(() => {
         // Random hoàn toàn vị trí x/y trên vùng A4, không chia lưới, không padding, chấp nhận chồng nhau nhẹ
         // Random vị trí số: giảm chồng lấn, tự nhiên hơn
-        function generateRandomPositions(
-            count: number,
-            width: number,
-            height: number,
-            size: number,
-            minDistance: number = 10,
-            maxTries: number = 100
-        ) {
-            const positions: { x: number, y: number }[] = [];
-            for (let i = 0; i < count; i++) {
-                let tries = 0;
-                let pos;
-                let valid = false;
-                while (tries < maxTries && !valid) {
-                    const x = Math.random() * (width - size);
-                    const y = Math.random() * (height - size);
-                    pos = { x, y };
-                    valid = true;
-                    for (const p of positions) {
-                        const dx = p.x - x;
-                        const dy = p.y - y;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist < size + minDistance) {
-                            valid = false;
-                            break;
-                        }
-                    }
-                    tries++;
-                }
-                positions.push(pos!);
-            }
-            return positions;
-        }
-        const positions = generateRandomPositions(100, A4_WIDTH, A4_HEIGHT, NUMBER_SIZE, 8, 100);
+        // Chia vùng A4 thành 10 hàng x 10 cột = 100 phần nhỏ, mỗi phần random 1 số
+        const COLS = 8;
+        const ROWS = Math.ceil(100 / COLS);
+        const REGION_W = A4_WIDTH / COLS;
+        const REGION_H = A4_HEIGHT / ROWS;
+        const positions: { x: number, y: number }[] = [];
+        for (let idx = 0; idx < 100; idx++) {
+            const row = Math.floor(idx / COLS);
+            const col = idx % COLS;
+            const regionX = col * REGION_W;
+            const regionY = row * REGION_H;
 
+            // Random 1 vị trí tuyệt đối trong phần này
+            // x nằm trong khoảng [from, to] = [regionX - NUMBER_SIZE/4, regionX + REGION_W - NUMBER_SIZE*3/4]
+            const x = (regionX - NUMBER_SIZE / 4) + Math.random() * (REGION_W - NUMBER_SIZE / 2);
+            const y = (regionY - NUMBER_SIZE / 4) + Math.random() * (REGION_H - NUMBER_SIZE / 2);
+
+            positions.push({ x, y });
+        }
         // Bước 3: Gán cho số 1-100
+        // Tạo mảng số từ 1 đến 100 và xáo trộn
+        const values = Array.from({ length: 100 }, (_, i) => i + 1);
+        // Fisher-Yates shuffle
+        for (let i = values.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [values[i], values[j]] = [values[j], values[i]];
+        }
+        // Gán cho số 1-100 với vị trí ngẫu nhiên
         const arr: NumberItem[] = [];
         for (let i = 0; i < 100; i++) {
             arr.push({
-                value: i + 1,
+                value: values[i], // dùng số đã xáo trộn
                 x: positions[i].x,
                 y: positions[i].y,
                 color: COLORS[Math.floor(Math.random() * COLORS.length)],
@@ -90,36 +89,21 @@ export default function Find100Number() {
             });
         }
         setNumbers(arr);
-        setStartTime(new Date());
-        setElapsed(0);
+
         setSelected([]);
         setCurrent(1);
-        setWrong(null);
     }, []);
-
-    // Timer
-    useEffect(() => {
-        if (!startTime) return;
-        const interval = setInterval(() => {
-            setElapsed(Math.floor((Date.now() - startTime.getTime()) / 1000));
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [startTime]);
 
     const handleSelect = (num: number) => {
         if (num === current) {
             setSelected([...selected, num]);
             setCurrent(current + 1);
-            setWrong(null);
-        } else {
-            setWrong(num);
-            setTimeout(() => setWrong(null), 600);
         }
     };
 
     // Render giấy ô ly vuông: các đường ngang, dọc xanh nhạt và một đường lề đỏ bên trái
     const renderGridPaper = () => {
-        const cellSize = 28; // px, chỉnh cho vừa mắt
+        const cellSize = A4_WIDTH / 14; // px, ---> 14 ô
         const rows = Math.floor(A4_HEIGHT / cellSize);
         const cols = Math.floor(A4_WIDTH / cellSize);
         const lines = [];
@@ -214,13 +198,42 @@ export default function Find100Number() {
         return lines;
     };
 
+    {/* Vẽ 100 vùng màu nhạt để phân biệt */ }
+    const render100Square = () => (
+        [...Array(100)].map((_, idx) => {
+            const COLS = 8;
+            const ROWS = Math.ceil(100 / COLS);
+            const REGION_W = A4_WIDTH / COLS;
+            const REGION_H = A4_HEIGHT / ROWS;
+            const row = Math.floor(idx / COLS);
+            const col = idx % COLS;
+            // Dùng HSL để mỗi vùng 1 màu pastel khác nhau
+            const hue = (idx * 37) % 360;
+            const bgColor = `hsl(${hue}, 70%, 70%)`;
+            return (
+                <View
+                    key={`region-bg-${idx}`}
+                    style={{
+                        position: 'absolute',
+                        left: col * REGION_W,
+                        top: row * REGION_H,
+                        width: REGION_W,
+                        height: REGION_H,
+                        backgroundColor: bgColor,
+                        opacity: 0.35,
+                        zIndex: 0,
+                    }}
+                />
+            );
+        })
+    );
+
     // Render số
     return (
         <View style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.icon}>←</Text>
-                <Text style={styles.timer}>{`${Math.floor(elapsed / 60).toString().padStart(2, '0')}:${(elapsed % 60).toString().padStart(2, '0')}`}</Text>
                 <Text style={styles.current}>{current <= 100 ? current : '✔️'}</Text>
                 <Text style={styles.icon}>🔍</Text>
                 <Text style={styles.icon}>⚙️</Text>
@@ -228,11 +241,11 @@ export default function Find100Number() {
             {/* Giấy kẻ ngang */}
             <View style={styles.a4sheet}>
                 {renderGridPaper()}
+                { /*render100Square()*/}
                 {numbers.map(item => {
                     const isSelected = selected.includes(item.value);
-                    const isWrong = wrong === item.value;
                     return (
-                        <View
+                        <TouchableOpacity
                             key={item.value}
                             style={[
                                 styles.numberBox,
@@ -243,24 +256,20 @@ export default function Find100Number() {
                                     transform: [{ rotate: `${item.rotation}deg` }],
                                 },
                             ]}
+                            onPress={() => handleSelect(item.value)}
+                            disabled={isSelected || current > 100}
+                            activeOpacity={0.7}
                         >
                             {/* Hiệu ứng động cho số vừa mới chọn đúng, số đã đúng thì giữ ellipse tĩnh */}
                             {isSelected && (
                                 item.value === lastSelected ? (
-                                    <CircleDrawAnimation size={NUMBER_SIZE} />
+                                    <CircleDrawAnimation size={NUMBER_SIZE - 8} />
                                 ) : (
-                                    <HandDrawnCircleStatic size={NUMBER_SIZE} />
+                                    <HandDrawnCircleStatic size={NUMBER_SIZE - 8} />
                                 )
                             )}
-                            <TouchableOpacity
-                                style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
-                                disabled={isSelected || current > 100}
-                                onPress={() => handleSelect(item.value)}
-                                activeOpacity={0.7}
-                            >
-                                <Text style={[styles.numberText, { color: item.color }]}>{item.value}</Text>
-                            </TouchableOpacity>
-                        </View>
+                            <Text style={[styles.numberText, { color: item.color }]}>{item.value}</Text>
+                        </TouchableOpacity>
                     );
                 })}
             </View>
@@ -307,7 +316,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
     },
     numberText: {
-        fontSize: 30,
+        fontSize: normalize(22),
         textAlign: 'center',
         fontFamily: 'Caveat',
         fontWeight: '500',
@@ -315,110 +324,7 @@ const styles = StyleSheet.create({
 });
 
 // Hiệu ứng khoanh tròn nét liền, vẽ tay tự nhiên
-function CircleDrawAnimation({ size = 50, stroke = '#2563eb', strokeWidth = 3, duration = 500, style = {} }) {
-  const rx = size / 2 + 6;
-  const ry = size / 2 + 6;
-  const cx = size / 2 + 9;
-  const cy = size / 2 + 9;
-  const rotate = (Math.random() - 0.5) * 10;
-  const segments = 48;
-  const noise = 4;
-
-  // Tạo path ellipse méo tự nhiên
-  const points = React.useMemo(
-    () => getHandDrawnEllipsePoints(cx, cy, rx, ry, segments, noise),
-    [cx, cy, rx, ry, segments, noise]
-  );
-  const path = React.useMemo(() => pointsToSvgPath(points), [points]);
-
-  // Ước lượng chu vi path
-  const perimeter = React.useMemo(() => {
-    let len = 0;
-    for (let i = 1; i < points.length; i++) {
-      const dx = points[i][0] - points[i - 1][0];
-      const dy = points[i][1] - points[i - 1][1];
-      len += Math.sqrt(dx * dx + dy * dy);
-    }
-    return len;
-  }, [points]);
-
-  const animatedOffset = React.useRef(new Animated.Value(perimeter)).current;
-
-  React.useEffect(() => {
-    Animated.timing(animatedOffset, {
-      toValue: 0,
-      duration,
-      useNativeDriver: false,
-    }).start();
-  }, []);
-
-  return (
-    <Svg
-      width={size + 18}
-      height={size + 18}
-      style={[
-        {
-          position: 'absolute',
-          left: -9,
-          top: -9,
-          zIndex: 2,
-          pointerEvents: 'none',
-        },
-        style,
-      ]}
-    >
-      <G rotation={rotate} origin={`${(size + 18) / 2},${(size + 18) / 2}`}>
-        <AnimatedPath
-          d={path}
-          stroke={stroke}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeDasharray={perimeter}
-          strokeDashoffset={animatedOffset}
-          opacity={0.93}
-        />
-      </G>
-    </Svg>
-  );
-}
-const AnimatedPath = Animated.createAnimatedComponent(Path);
-
-function getHandDrawnEllipsePoints(
-  cx: number,
-  cy: number,
-  rx: number,
-  ry: number,
-  segments: number = 48,
-  noise: number = 4
-): [number, number][] {
-  const points: [number, number][] = [];
-  for (let i = 0; i < segments; i++) {
-    const theta = (2 * Math.PI * i) / segments;
-    const rrx = rx + (Math.random() - 0.5) * noise;
-    const rry = ry + (Math.random() - 0.5) * noise;
-    const x = cx + rrx * Math.cos(theta);
-    const y = cy + rry * Math.sin(theta);
-    points.push([x, y]);
-  }
-  points.push(points[0]);
-  return points;
-}
-
-function pointsToSvgPath(points: [number, number][]): string {
-  return points.map(([x, y], i) => (i === 0 ? `M${x},${y}` : `L${x},${y}`)).join(' ') + ' Z';
-}
-
-function HandDrawnCircleStatic({
-    size = 50,
-    stroke = '#2563eb',
-    strokeWidth = 3,
-    customStyle = {},
-  }: {
-    size?: number;
-    stroke?: string;
-    strokeWidth?: number;
-    customStyle?: any;
-  }) {
+function CircleDrawAnimation({ size = 50, stroke = '#2563eb', strokeWidth = 3, duration = 300, style = {} }) {
     const rx = size / 2 + 6;
     const ry = size / 2 + 6;
     const cx = size / 2 + 9;
@@ -426,35 +332,151 @@ function HandDrawnCircleStatic({
     const rotate = (Math.random() - 0.5) * 10;
     const segments = 48;
     const noise = 4;
+
+    // Tạo path ellipse méo tự nhiên
     const points = React.useMemo(
-      () => getHandDrawnEllipsePoints(cx, cy, rx, ry, segments, noise),
-      [cx, cy, rx, ry, segments, noise]
+        () => getHandDrawnEllipsePoints(cx, cy, rx, ry, segments, noise),
+        [cx, cy, rx, ry, segments, noise]
+    );
+    const path = React.useMemo(() => pointsToSvgPath(points), [points]);
+
+    // Ước lượng chu vi path
+    const perimeter = React.useMemo(() => {
+        let len = 0;
+        for (let i = 1; i < points.length; i++) {
+            const dx = points[i][0] - points[i - 1][0];
+            const dy = points[i][1] - points[i - 1][1];
+            len += Math.sqrt(dx * dx + dy * dy);
+        }
+        return len;
+    }, [points]);
+
+    const animatedOffset = React.useRef(new Animated.Value(perimeter)).current;
+
+    React.useEffect(() => {
+        Animated.timing(animatedOffset, {
+            toValue: 0,
+            duration,
+            useNativeDriver: false,
+        }).start();
+    }, []);
+
+    return (
+        <Svg
+            width={size + 18}
+            height={size + 18}
+            style={[
+                {
+                    position: 'absolute',
+                    left: -9,
+                    top: -9,
+                    zIndex: 2,
+                    pointerEvents: 'none',
+                },
+                style,
+            ]}
+        >
+            <G rotation={rotate} origin={`${(size + 18) / 2},${(size + 18) / 2}`}>
+                <AnimatedPath
+                    d={path}
+                    stroke={stroke}
+                    strokeWidth={strokeWidth}
+                    fill="none"
+                    strokeDasharray={perimeter}
+                    strokeDashoffset={animatedOffset}
+                    opacity={0.93}
+                />
+            </G>
+        </Svg>
+    );
+}
+const AnimatedPath = Animated.createAnimatedComponent(Path);
+
+function getHandDrawnEllipsePoints(
+    cx: number,
+    cy: number,
+    rx: number,
+    ry: number,
+    segments: number = 120, // vừa phải để smoothing hiệu quả
+    noise: number = 1.1
+): [number, number][] {
+    const points: [number, number][] = [];
+    for (let i = 0; i < segments; i++) {
+        const theta = (2 * Math.PI * i) / segments;
+        const rrx = rx + (Math.random() - 0.5) * noise;
+        const rry = ry + (Math.random() - 0.5) * noise;
+        const x = cx + rrx * Math.cos(theta);
+        const y = cy + rry * Math.sin(theta);
+        points.push([x, y]);
+    }
+    points.push(points[0]);
+
+    // Smoothing bằng moving average
+    const smoothPoints: [number, number][] = [];
+    const window = 7; // càng lớn càng mượt
+    for (let i = 0; i < points.length; i++) {
+        let sumX = 0, sumY = 0, count = 0;
+        for (let j = -Math.floor(window / 2); j <= Math.floor(window / 2); j++) {
+            const idx = (i + j + points.length) % points.length;
+            sumX += points[idx][0];
+            sumY += points[idx][1];
+            count++;
+        }
+        smoothPoints.push([sumX / count, sumY / count]);
+    }
+    return smoothPoints;
+}
+
+function pointsToSvgPath(points: [number, number][]): string {
+    return points.map(([x, y], i) => (i === 0 ? `M${x},${y}` : `L${x},${y}`)).join(' ') + ' Z';
+}
+
+function HandDrawnCircleStatic({
+    size = 50,
+    stroke = '#2563eb',
+    strokeWidth = 2,
+    customStyle = {},
+}: {
+    size?: number;
+    stroke?: string;
+    strokeWidth?: number;
+    customStyle?: any;
+}) {
+    const rx = size / 2 + 6;
+    const ry = size / 2 + 6;
+    const cx = size / 2 + 9;
+    const cy = size / 2 + 9;
+    const segments = 48;
+    const noise = 4;
+    const points = React.useMemo(
+        () => getHandDrawnEllipsePoints(cx, cy, rx, ry, segments, noise),
+        [cx, cy, rx, ry, segments, noise]
     );
     const path = React.useMemo(() => pointsToSvgPath(points), [points]);
     return (
-      <Svg
-        width={size + 18}
-        height={size + 18}
-        style={[
-          {
-            position: 'absolute',
-            left: -9,
-            top: -9,
-            zIndex: 2,
-            pointerEvents: 'none',
-          },
-          customStyle,
-        ]}
-      >
-        <G rotation={rotate} origin={`${(size + 18) / 2},${(size + 18) / 2}`}>
-          <Path
-            d={path}
-            stroke={stroke}
-            strokeWidth={strokeWidth}
-            fill="none"
-            opacity={0.93}
-          />
-        </G>
-      </Svg>
+        <Svg
+            width={size + 18}
+            height={size + 18}
+            style={[
+                {
+                    position: 'absolute',
+                    left: -9,
+                    top: -9,
+                    zIndex: 2,
+                    pointerEvents: 'none',
+                },
+                customStyle,
+            ]}
+        >
+            <G origin={`${(size + 18) / 2},${(size + 18) / 2}`}>
+                <Path
+                    d={path}
+                    stroke={stroke}
+                    strokeWidth={strokeWidth}
+                    fill="none"
+                    opacity={0.9}
+                />
+            </G>
+        </Svg>
     );
-  }
+}
