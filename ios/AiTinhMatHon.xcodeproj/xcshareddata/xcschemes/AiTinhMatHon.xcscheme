@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "AiTinhMatHon.app"
-               BlueprintName = "AiTinhMatHon"
-               ReferencedContainer = "container:AiTinhMatHon.xcodeproj">
+               BuildableName = "timsotu1den100.app"
+               BlueprintName = "timsotu1den100"
+               ReferencedContainer = "container:timsotu1den100.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "AiTinhMatHonTests.xctest"
-               BlueprintName = "AiTinhMatHonTests"
-               ReferencedContainer = "container:AiTinhMatHon.xcodeproj">
+               BuildableName = "timsotu1den100Tests.xctest"
+               BlueprintName = "timsotu1den100Tests"
+               ReferencedContainer = "container:timsotu1den100.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "AiTinhMatHon.app"
-            BlueprintName = "AiTinhMatHon"
-            ReferencedContainer = "container:AiTinhMatHon.xcodeproj">
+            BuildableName = "timsotu1den100.app"
+            BlueprintName = "timsotu1den100"
+            ReferencedContainer = "container:timsotu1den100.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "AiTinhMatHon.app"
-            BlueprintName = "AiTinhMatHon"
-            ReferencedContainer = "container:AiTinhMatHon.xcodeproj">
+            BuildableName = "timsotu1den100.app"
+            BlueprintName = "timsotu1den100"
+            ReferencedContainer = "container:timsotu1den100.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

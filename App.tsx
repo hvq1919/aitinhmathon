@@ -3,11 +3,9 @@ import * as React from 'react';
 import { StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import MainGamePlay from './src/screens/MainGamePlay';
 import HomeScreen from './src/screens/HomeScreen';
 import HighScoreScreen from './src/screens/HighScoreScreen';
 import HelpScreen from './src/screens/HelpScreen';
-import GameRoomScreen from './src/screens/rooms/GameRoomScreen';
 import JoinRoomScreen from './src/screens/rooms/JoinRoomScreen';
 import Find100Number from './src/screens/Find100Number';
 

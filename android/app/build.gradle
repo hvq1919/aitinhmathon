@@ -77,9 +77,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "net.starkids.aitinhmathon"
+    namespace "net.starkids.timsotu1den100"
     defaultConfig {
-        applicationId "net.starkids.aitinhmathon"
+        applicationId "net.starkids.timsotu1den100"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

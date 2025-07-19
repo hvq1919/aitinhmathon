@@ -1,4 +1,4 @@
-package net.starkids.aitinhmathon
+package net.starkids.timsotu1den100
 import com.facebook.reactnative.androidsdk.FBSDKPackage;
 import android.app.Application
 import com.facebook.react.PackageList
@@ -11,7 +11,7 @@ import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.soloader.SoLoader
-import net.starkids.aitinhmathon.BuildConfig
+import net.starkids.timsotu1den100.BuildConfig
 
 class MainApplication : Application(), ReactApplication {
 
