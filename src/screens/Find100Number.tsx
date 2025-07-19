@@ -1,9 +1,20 @@
 /* eslint-disable curly */
 /* eslint-disable react-native/no-inline-styles */
 import React, { useState, useEffect } from 'react';
-import { Dimensions, PixelRatio, Platform } from 'react-native';
+import {
+    Dimensions,
+    PixelRatio,
+    Platform,
+    View,
+    Text,
+    TouchableOpacity,
+    StyleSheet,
+    StatusBar,
+    Animated
+} from 'react-native';
 
 const DeviceWidth = Dimensions.get('window').width;
+const DeviceHeight = Dimensions.get('window').height;
 const guidelineBaseWidth = 360; // Android phổ biến
 function normalize(size: number) {
     if (Platform.OS !== 'android') return size; // chỉ scale trên Android
@@ -11,8 +22,8 @@ function normalize(size: number) {
     const newSize = size * scale;
     return Math.round(PixelRatio.roundToNearestPixel(newSize));
 }
-import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Animated } from 'react-native';
 import Svg, { G, Path } from 'react-native-svg';
+import { loadSounds, playCorrect, playWrong, releaseSounds } from '../soundManager';
 
 type NumberItem = {
     value: number;
@@ -36,7 +47,7 @@ const COLORS = [
 ];
 
 const A4_WIDTH = DeviceWidth; // px (mobile), scale lại cho vừa màn hình
-const A4_HEIGHT = DeviceWidth * 1.7;
+const A4_HEIGHT = DeviceHeight - (StatusBar.currentHeight || 24) - 48 - 48; // 48 : header, 48: Admob height
 const NUMBER_SIZE = 32;
 
 export default function Find100Number() {
@@ -45,6 +56,13 @@ export default function Find100Number() {
     const [current, setCurrent] = useState(1);
 
     const lastSelected = selected[selected.length - 1];
+
+    useEffect(() => {
+        loadSounds();
+        return () => {
+            releaseSounds(); // cleanup
+        };
+    }, []);
 
     // Khởi tạo số random vị trí/màu/xoay
     useEffect(() => {
@@ -98,6 +116,9 @@ export default function Find100Number() {
         if (num === current) {
             setSelected([...selected, num]);
             setCurrent(current + 1);
+            playCorrect();
+        } else {
+            playWrong();
         }
     };
 
@@ -109,21 +130,21 @@ export default function Find100Number() {
         const lines = [];
 
         // Đường lề đỏ (dọc)
-        lines.push(
-            <View
-                key="red-margin"
-                style={{
-                    position: 'absolute',
-                    left: cellSize * 2,
-                    top: 0,
-                    width: 2,
-                    height: A4_HEIGHT,
-                    backgroundColor: '#ff6b81',
-                    opacity: 0.7,
-                    zIndex: 1,
-                }}
-            />
-        );
+        // lines.push(
+        //     <View
+        //         key="red-margin"
+        //         style={{
+        //             position: 'absolute',
+        //             left: cellSize * 2,
+        //             top: 0,
+        //             width: 2,
+        //             height: A4_HEIGHT,
+        //             backgroundColor: '#ff6b81',
+        //             opacity: 0.7,
+        //             zIndex: 1,
+        //         }}
+        //     />
+        // );
 
         // Các đường kẻ ngang và nét đứt
         for (let i = 1; i <= rows; i++) {
@@ -241,7 +262,7 @@ export default function Find100Number() {
             {/* Giấy kẻ ngang */}
             <View style={styles.a4sheet}>
                 {renderGridPaper()}
-                { /*render100Square()*/}
+                {/*render100Square()*/}
                 {numbers.map(item => {
                     const isSelected = selected.includes(item.value);
                     return (
@@ -250,6 +271,7 @@ export default function Find100Number() {
                             style={[
                                 styles.numberBox,
                                 {
+                                    paddingHorizontal: item.value < 10 ? 8 : 5,
                                     left: item.x,
                                     top: item.y,
                                     backgroundColor: 'transparent',
@@ -298,25 +320,19 @@ const styles = StyleSheet.create({
         width: A4_WIDTH,
         height: A4_HEIGHT,
         backgroundColor: '#fff',
-        borderRadius: 5,
-        borderWidth: 1,
-        borderColor: '#e5e7eb',
+        // borderRadius: 5,
+        // borderWidth: 1,
+        // borderColor: '#e5e7eb',
         marginVertical: 8,
         overflow: 'hidden',
     },
     numberBox: {
         position: 'absolute',
-        width: NUMBER_SIZE,
-        height: NUMBER_SIZE,
-        borderRadius: NUMBER_SIZE / 2,
-        borderWidth: 2,
-        borderColor: 'transparent',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'transparent',
     },
     numberText: {
-        fontSize: normalize(22),
+        fontSize: DeviceWidth / 20,
         textAlign: 'center',
         fontFamily: 'Caveat',
         fontWeight: '500',
